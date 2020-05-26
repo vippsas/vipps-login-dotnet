@@ -3,7 +3,7 @@ using System.Configuration;
 using Microsoft.Owin;
 using Owin;
 
-namespace Epi.VippsLogin
+namespace Vipps.Login
 {
     public class VippsHelpers
     {

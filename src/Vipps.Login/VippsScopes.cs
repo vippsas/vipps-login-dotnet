@@ -1,6 +1,6 @@
-﻿namespace Epi.VippsLogin
+﻿namespace Vipps.Login
 {
-    public static class VippsScope
+    public static class VippsScopes
     {
         public const string OpenId = "openid";
         public const string Name = "name";

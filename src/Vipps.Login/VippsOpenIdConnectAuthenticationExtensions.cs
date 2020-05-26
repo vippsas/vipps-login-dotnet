@@ -2,7 +2,7 @@
 using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
 
-namespace Epi.VippsLogin
+namespace Vipps.Login
 {
     public static class VippsOpenIdConnectAuthenticationExtensions
     {

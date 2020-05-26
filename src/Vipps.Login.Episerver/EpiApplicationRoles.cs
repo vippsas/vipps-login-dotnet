@@ -1,4 +1,4 @@
-﻿namespace Epi.VippsLogin
+﻿namespace Vipps.Login.Episerver
 {
     public static class EpiApplicationRoles
     {

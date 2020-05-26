@@ -7,8 +7,8 @@
     <ProjectGuid>{70FE9513-2E01-454D-B69D-0B1EC8B9079B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Epi.VippsLogin</RootNamespace>
-    <AssemblyName>Epi.VippsLogin</AssemblyName>
+    <RootNamespace>Vipps.Login.Episerver</RootNamespace>
+    <AssemblyName>Vipps.Login.Episerver</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -216,23 +216,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClaimsIdentityExtensions.cs" />
-    <Compile Include="Models\VippsAddressType.cs" />
     <Compile Include="AppBuilderExtensions.cs" />
     <Compile Include="EpiApplicationRoles.cs" />
-    <Compile Include="Models\VippsAddress.cs" />
-    <Compile Include="VippsHelpers.cs" />
-    <Compile Include="VippsScope.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VippsAuthenticationDefaults.cs" />
     <Compile Include="VippsLoginConfig.cs" />
-    <Compile Include="VippsOpenIdConnectAuthenticationExtensions.cs" />
-    <Compile Include="VippsOpenIdConnectAuthenticationHandler.cs" />
-    <Compile Include="VippsOpenIdConnectAuthenticationMiddleware.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Vipps.Login\Vipps.Login.csproj">
+      <Project>{ABB1A5A1-BE5D-4750-912D-65C775CF1993}</Project>
+      <Name>Vipps.Login</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

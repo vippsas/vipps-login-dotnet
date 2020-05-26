@@ -4,7 +4,7 @@ using Microsoft.Owin.Security.Infrastructure;
 using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
 
-namespace Epi.VippsLogin
+namespace Vipps.Login
 {
     public class VippsOpenIdConnectAuthenticationMiddleware : OpenIdConnectAuthenticationMiddleware
     {

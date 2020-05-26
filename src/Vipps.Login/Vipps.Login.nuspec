@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
-    <id>Epi.VippsLogin</id>
+    <id>Vipps.Login</id>
     <version>$version$</version>
     <authors>Geta</authors>
-    <owners>Geta</owners>
+    <owners>Vipps</owners>
     <projectUrl>https://github.com/Geta/vipps-login</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Geta EPiServer Vipps Login</description>
-    <tags>Geta EPiServer Vipps Login</tags>
+    <description>Vipps Login using Microsoft.Owin OpenIdConnect</description>
+    <tags>Geta Vipps Login Owin OpenIdConnect</tags>
   </metadata>
 </package>

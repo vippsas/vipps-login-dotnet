@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
-namespace Epi.VippsLogin.Models
+namespace Vipps.Login.Models
 {
     public class VippsAddress
     {

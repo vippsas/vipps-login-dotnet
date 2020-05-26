@@ -1,10 +1,4 @@
-﻿using IdentityModel.Client;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.Owin.Extensions;
-using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.OpenIdConnect;
-using Owin;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
@@ -12,9 +6,15 @@ using System.Threading.Tasks;
 using System.Web.Helpers;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
+using IdentityModel.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Owin.Extensions;
+using Microsoft.Owin.Security;
+using Microsoft.Owin.Security.OpenIdConnect;
+using Owin;
 
-namespace Epi.VippsLogin
+namespace Vipps.Login.Episerver
 {
     public static class AppBuilderExtensions
     {
@@ -27,12 +27,12 @@ namespace Epi.VippsLogin
                 ClientSecret = VippsLoginConfig.ClientSecret,
                 Authority = VippsLoginConfig.Authority,
                 Scope = string.Join(" ", 
-                    VippsScope.OpenId,
-                    VippsScope.Name,
-                    VippsScope.Email,
-                    VippsScope.Address,
-                    VippsScope.PhoneNumber,
-                    VippsScope.BirthDate),
+                    VippsScopes.OpenId,
+                    VippsScopes.Name,
+                    VippsScopes.Email,
+                    VippsScopes.Address,
+                    VippsScopes.PhoneNumber,
+                    VippsScopes.BirthDate),
                 ResponseType = OpenIdConnectResponseType.Code,
                 ResponseMode = OpenIdConnectResponseMode.Query,
                 RedeemCode = true,

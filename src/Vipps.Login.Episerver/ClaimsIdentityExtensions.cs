@@ -1,17 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using Epi.VippsLogin.Models;
+using EPiServer.Logging;
+using IdentityModel;
 using Newtonsoft.Json;
+using Vipps.Login.Models;
 
-namespace Epi.VippsLogin
+namespace Vipps.Login.Episerver
 {
     public static class ClaimsIdentityExtensions
     {
+        private static readonly ILogger _logger = LogManager.GetLogger(typeof(ClaimsIdentityExtensions));
         public static IEnumerable<VippsAddress> GetVippsAddresses(this ClaimsIdentity identity)
         {
             return identity
-                .FindAll(VippsScope.Address)
+                .FindAll(JwtClaimTypes.Address)
                 .Select(DeserializeAddress);
         }
 
@@ -28,6 +31,7 @@ namespace Epi.VippsLogin
             }
             catch (JsonException ex)
             {
+                _logger.Debug("Can't deserialize address claim", ex);
                 return null;
             }
         }

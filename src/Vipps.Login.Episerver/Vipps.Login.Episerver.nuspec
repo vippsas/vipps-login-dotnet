@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Vipps.Login.Episerver</id>
+    <version>$version$</version>
+    <authors>Geta</authors>
+    <owners>Vipps</owners>
+    <projectUrl>https://github.com/Geta/vipps-login</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Vipps Login for Episerver</description>
+    <tags>Geta Vipps Login Episerver</tags>
+  </metadata>
+</package>

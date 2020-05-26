@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Owin.Logging;
 using Microsoft.Owin.Security.OpenIdConnect;
 
-namespace Epi.VippsLogin
+namespace Vipps.Login
 {
     public class VippsOpenIdConnectAuthenticationHandler : OpenIdConnectAuthenticationHandler
     {
