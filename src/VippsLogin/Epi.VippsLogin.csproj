@@ -217,9 +217,14 @@
   <ItemGroup>
     <Compile Include="AppBuilderExtensions.cs" />
     <Compile Include="EpiApplicationRoles.cs" />
-    <Compile Include="OpenIdConnectScope.cs" />
+    <Compile Include="VippsHelpers.cs" />
+    <Compile Include="VippsScope.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VippsAuthenticationDefaults.cs" />
     <Compile Include="VippsLoginConfig.cs" />
+    <Compile Include="VippsOpenIdConnectAuthenticationExtensions.cs" />
+    <Compile Include="VippsOpenIdConnectAuthenticationHandler.cs" />
+    <Compile Include="VippsOpenIdConnectAuthenticationMiddleware.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
