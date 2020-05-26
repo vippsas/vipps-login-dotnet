@@ -215,8 +215,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClaimsIdentityExtensions.cs" />
+    <Compile Include="Models\VippsAddressType.cs" />
     <Compile Include="AppBuilderExtensions.cs" />
     <Compile Include="EpiApplicationRoles.cs" />
+    <Compile Include="Models\VippsAddress.cs" />
     <Compile Include="VippsHelpers.cs" />
     <Compile Include="VippsScope.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -230,5 +233,6 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
