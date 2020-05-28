@@ -98,11 +98,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClaimsIdentityExtensions.cs" />
+    <Compile Include="IVippsLoginService.cs" />
     <Compile Include="Models\VippsUserInfo.cs" />
     <Compile Include="Models\VippsAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VippsAuthenticationDefaults.cs" />
     <Compile Include="VippsHelpers.cs" />
+    <Compile Include="VippsLoginService.cs" />
     <Compile Include="VippsOpenIdConnectAuthenticationExtensions.cs" />
     <Compile Include="VippsOpenIdConnectAuthenticationHandler.cs" />
     <Compile Include="VippsOpenIdConnectAuthenticationMiddleware.cs" />
