@@ -28,7 +28,7 @@ namespace Vipps.Login
                 throw new ArgumentNullException(nameof(metadataAddress));
             }
 
-            return app.UseVippsOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions()
+            return app.UseVippsOpenIdConnectAuthentication(new VippsOpenIdConnectAuthenticationOptions()
             {
                 ClientId = clientId,
                 MetadataAddress = metadataAddress,
@@ -43,7 +43,7 @@ namespace Vipps.Login
         /// <returns>The updated <see cref="IAppBuilder"/></returns>
         public static IAppBuilder UseVippsOpenIdConnectAuthentication(
             this IAppBuilder app,
-            OpenIdConnectAuthenticationOptions openIdConnectOptions)
+            VippsOpenIdConnectAuthenticationOptions openIdConnectOptions)
         {
             if (app == null)
             {

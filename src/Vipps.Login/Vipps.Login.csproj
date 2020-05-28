@@ -108,6 +108,7 @@
     <Compile Include="VippsOpenIdConnectAuthenticationExtensions.cs" />
     <Compile Include="VippsOpenIdConnectAuthenticationHandler.cs" />
     <Compile Include="VippsOpenIdConnectAuthenticationMiddleware.cs" />
+    <Compile Include="VippsOpenIdConnectAuthenticationOptions.cs" />
     <Compile Include="VippsScopes.cs" />
   </ItemGroup>
   <ItemGroup>

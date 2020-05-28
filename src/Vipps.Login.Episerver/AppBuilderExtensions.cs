@@ -20,7 +20,7 @@ namespace Vipps.Login.Episerver
     {
         public static void ConfigureAuthentication(this IAppBuilder app)
         {
-            app.UseVippsOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
+            app.UseVippsOpenIdConnectAuthentication(new VippsOpenIdConnectAuthenticationOptions
             {
                 AuthenticationType = VippsAuthenticationDefaults.AuthenticationType,
                 ClientId = VippsLoginConfig.ClientId,
