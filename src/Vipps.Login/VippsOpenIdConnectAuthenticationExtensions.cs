@@ -41,7 +41,9 @@ namespace Vipps.Login
         /// <param name="app">The <see cref="IAppBuilder"/> passed to the configuration method</param>
         /// <param name="openIdConnectOptions">A <see cref="OpenIdConnectAuthenticationOptions"/> contains settings for obtaining identities using the OpenIdConnect protocol.</param>
         /// <returns>The updated <see cref="IAppBuilder"/></returns>
-        public static IAppBuilder UseVippsOpenIdConnectAuthentication(this IAppBuilder app, OpenIdConnectAuthenticationOptions openIdConnectOptions)
+        public static IAppBuilder UseVippsOpenIdConnectAuthentication(
+            this IAppBuilder app,
+            OpenIdConnectAuthenticationOptions openIdConnectOptions)
         {
             if (app == null)
             {

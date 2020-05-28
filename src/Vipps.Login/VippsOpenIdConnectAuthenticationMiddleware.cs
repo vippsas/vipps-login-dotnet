@@ -10,7 +10,10 @@ namespace Vipps.Login
     {
         private readonly ILogger _logger;
 
-        public VippsOpenIdConnectAuthenticationMiddleware(OwinMiddleware next, IAppBuilder app, OpenIdConnectAuthenticationOptions options) : base(next, app, options)
+        public VippsOpenIdConnectAuthenticationMiddleware(
+            OwinMiddleware next,
+            IAppBuilder app,
+            OpenIdConnectAuthenticationOptions options) : base(next, app, options)
         {
             _logger = app.CreateLogger<VippsOpenIdConnectAuthenticationMiddleware>();
         }

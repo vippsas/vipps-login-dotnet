@@ -276,7 +276,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddressExtensions.cs" />
-    <Compile Include="ClaimsIdentityExtensions.cs" />
     <Compile Include="AppBuilderExtensions.cs" />
     <Compile Include="EpiApplicationRoles.cs" />
     <Compile Include="MetadataConstants.cs" />
