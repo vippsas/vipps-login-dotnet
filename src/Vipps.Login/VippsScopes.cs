@@ -8,5 +8,6 @@
         public const string Address = "address";
         public const string PhoneNumber = "phoneNumber";
         public const string BirthDate = "birthDate";
+        public const string Nnin = "nnin";
     }
 }
