@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web.Helpers;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
-using IdentityModel.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin.Extensions;
@@ -18,30 +16,31 @@ namespace Vipps.Login.Episerver
 {
     public static class AppBuilderExtensions
     {
-        public static void ConfigureAuthentication(this IAppBuilder app)
+        private const string ReturnUrl = "ReturnUrl";
+
+        public static void ConfigureVippsAuthentication(this IAppBuilder app,
+            VippsInitAuthenticationOptions options
+            )
         {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options.Scopes == null) throw new ArgumentNullException(nameof(options.Scopes));
+            if (!options.Scopes.Contains(VippsScopes.OpenId)) throw new ArgumentNullException(nameof(options.Scopes), "The VippsScopes.OpenId scope is mandatory");
+            if (options.UserNameClaim == null) throw new ArgumentNullException(nameof(options.UserNameClaim));
+
+            app.SetDefaultSignInAsAuthenticationType(options.CookieAuthType);
             app.UseVippsOpenIdConnectAuthentication(new VippsOpenIdConnectAuthenticationOptions
             {
+                // This should match CookieAuthentication AuthenticationType
                 AuthenticationType = VippsAuthenticationDefaults.AuthenticationType,
+                // Your credentials
                 ClientId = VippsLoginConfig.ClientId,
                 ClientSecret = VippsLoginConfig.ClientSecret,
                 Authority = VippsLoginConfig.Authority,
-                Scope = string.Join(" ", 
-                    VippsScopes.OpenId,
-                    VippsScopes.Name,
-                    VippsScopes.Email,
-                    VippsScopes.Address,
-                    VippsScopes.PhoneNumber,
-                    VippsScopes.BirthDate),
-                ResponseType = OpenIdConnectResponseType.Code,
-                ResponseMode = OpenIdConnectResponseMode.Query,
-                RedeemCode = true,
-                AuthenticationMode = AuthenticationMode.Passive,
-                TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    RoleClaimType = ClaimTypes.Role
-                },
+                // Here you pass in the scopes you need
+                Scope = string.Join(" ", options.Scopes),
+                // Store tokens on identity
+                SaveTokens = options.SaveTokens,
+                // Various notifications that we can handle during the auth flow
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
                     RedirectToIdentityProvider = context =>
@@ -61,7 +60,7 @@ namespace Vipps.Login.Episerver
                             context.HandleResponse();
                         }
 
-                        //XHR requests cannot handle redirects to a login screen, return 401
+                        // XHR requests cannot handle redirects to a login screen, return 401
                         if (context.OwinContext.Response.StatusCode == 401 && VippsHelpers.IsXhrRequest(context.OwinContext.Request))
                         {
                             context.HandleResponse();
@@ -82,26 +81,14 @@ namespace Vipps.Login.Episerver
                         // Set username
                         var identity = ctx.AuthenticationTicket.Identity;
                         identity.AddClaim(
-                            new Claim(identity.NameClaimType, identity.FindFirst(ClaimTypes.Email)?.Value)
+                            new Claim(identity.NameClaimType, identity.FindFirst(options.UserNameClaim)?.Value)
                         );
 
-                        var configuration =
-                            await ctx.Options.ConfigurationManager
-                                .GetConfigurationAsync(ctx.Request.CallCancelled)
-                                .ConfigureAwait(false);
-                        var response = await new HttpClient().GetUserInfoAsync(new UserInfoRequest
+                        // Can be used to add/delete claims or change other properties
+                        if (options.SecurityTokenValidated != null)
                         {
-                            Address = configuration.UserInfoEndpoint,
-                            Token = ctx.ProtocolMessage.AccessToken
-                        });
-                        if (response.IsError)
-                            throw new Exception(response.Error);
-
-                        // Set roles
-                        identity.AddClaim(new Claim(ClaimTypes.Role, EpiApplicationRoles.Administrators,
-                            ClaimValueTypes.String));
-                        identity.AddClaim(new Claim(ClaimTypes.Role, EpiApplicationRoles.WebAdmins,
-                            ClaimValueTypes.String));
+                            await options.SecurityTokenValidated(identity);
+                        }
 
                         // Sync user and the roles to Epi
                         await ServiceLocator.Current.GetInstance<ISynchronizingUserService>()
@@ -109,6 +96,7 @@ namespace Vipps.Login.Episerver
                     },
                     AuthenticationFailed = context =>
                     {
+                        // Here you can decide what to do if authentication failed
                         context.HandleResponse();
                         context.Response.Write(context.Exception.Message);
                         return Task.FromResult(0);
@@ -116,27 +104,34 @@ namespace Vipps.Login.Episerver
                 }
             });
             app.UseStageMarker(PipelineStage.Authenticate);
-            app.Map("/vipps-login", map => map.Run(ctx =>
-            {
-                if (ctx.Authentication.User?.Identity == null || !ctx.Authentication.User.Identity.IsAuthenticated)
-                {
-                    ctx.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType);
-                    return Task.Delay(0);
-                }
 
-                var returnUrl = ctx.Request.Query.Get("ReturnUrl") ?? "/";
-
-                return Task.Run(() => ctx.Response.Redirect(returnUrl));
-            }));
-            app.Map("/vipps-logout", map =>
+            if (!string.IsNullOrWhiteSpace(options.LoginPath))
             {
-                map.Run(context =>
+                app.Map(options.LoginPath, map => map.Run(ctx =>
                 {
-                    context.Authentication.SignOut(VippsAuthenticationDefaults.AuthenticationType);
-                    return Task.FromResult(0);
+                    if (ctx.Authentication.User?.Identity == null || !ctx.Authentication.User.Identity.IsAuthenticated)
+                    {
+                        ctx.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType);
+                        return Task.Delay(0);
+                    }
+
+                    var returnUrl = ctx.Request.Query.Get(ReturnUrl) ?? "/";
+
+                    return Task.Run(() => ctx.Response.Redirect(returnUrl));
+                }));
+            }
+
+            if (!string.IsNullOrWhiteSpace(options.LogoutPath))
+            {
+                app.Map(options.LogoutPath, map =>
+                {
+                    map.Run(context =>
+                    {
+                        context.Authentication.SignOut(VippsAuthenticationDefaults.AuthenticationType);
+                        return Task.FromResult(0);
+                    });
                 });
-            });
-            AntiForgeryConfig.UniqueClaimTypeIdentifier = ClaimTypes.Name;
+            }   
         }
     }
 }

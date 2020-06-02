@@ -278,6 +278,7 @@
     <Compile Include="AddressExtensions.cs" />
     <Compile Include="AppBuilderExtensions.cs" />
     <Compile Include="EpiApplicationRoles.cs" />
+    <Compile Include="VippsAuthenticationInitOptions.cs" />
     <Compile Include="VippsLoginInitialization.cs" />
     <Compile Include="MetadataConstants.cs" />
     <Compile Include="Initialization\MetadataInitialization.cs" />
