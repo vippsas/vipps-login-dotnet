@@ -4,7 +4,7 @@ using Mediachase.BusinessFoundation.Data;
 using Mediachase.BusinessFoundation.Data.Meta.Management;
 using Mediachase.Commerce.Customers;
 
-namespace Vipps.Login.Episerver.Initialization
+namespace Vipps.Login.Episerver.Commerce.Initialization
 {
     [InitializableModule]
     [ModuleDependency(typeof(EPiServer.Commerce.Initialization.InitializationModule))]

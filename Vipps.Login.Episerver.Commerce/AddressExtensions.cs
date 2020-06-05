@@ -3,7 +3,7 @@ using System.Linq;
 using Mediachase.Commerce.Customers;
 using Vipps.Login.Models;
 
-namespace Vipps.Login.Episerver
+namespace Vipps.Login.Episerver.Commerce.Episerver
 {
     public static class AddressExtensions
     {

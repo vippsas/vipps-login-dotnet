@@ -1,4 +1,4 @@
-﻿namespace Vipps.Login.Episerver
+﻿namespace Vipps.Login.Episerver.Commerce
 {
     public class MetadataConstants
     {
