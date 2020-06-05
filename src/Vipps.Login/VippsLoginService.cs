@@ -13,17 +13,6 @@ namespace Vipps.Login
     public class VippsLoginService : IVippsLoginService
     {
         private const string NorwegianLanguageTag = "no";
-        private static readonly HttpClient _httpClient = new HttpClient();
-
-        public virtual async Task<VippsUserInfo> GetVippsUserInfo(string userInfoEndpoint, string accessToken)
-        {
-            var response = await _httpClient.GetUserInfoAsync(new UserInfoRequest()
-            {
-                Address = userInfoEndpoint,
-                Token = accessToken
-            }).ConfigureAwait(false);
-            return response.Json.ToObject<VippsUserInfo>();
-        }
 
         public virtual VippsUserInfo GetVippsUserInfo(ClaimsIdentity identity)
         {

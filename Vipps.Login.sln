@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vipps.Login", "src\Vipps.Lo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vipps.Login.Episerver", "src\Vipps.Login.Episerver\Vipps.Login.Episerver.csproj", "{70FE9513-2E01-454D-B69D-0B1EC8B9079B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vipps.Login.Episerver.Commerce", "src\Vipps.Login.Episerver.Commerce\Vipps.Login.Episerver.Commerce.csproj", "{9335A782-1496-4477-B5DD-E6E5024CD2F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{70FE9513-2E01-454D-B69D-0B1EC8B9079B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70FE9513-2E01-454D-B69D-0B1EC8B9079B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70FE9513-2E01-454D-B69D-0B1EC8B9079B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9335A782-1496-4477-B5DD-E6E5024CD2F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9335A782-1496-4477-B5DD-E6E5024CD2F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9335A782-1496-4477-B5DD-E6E5024CD2F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9335A782-1496-4477-B5DD-E6E5024CD2F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

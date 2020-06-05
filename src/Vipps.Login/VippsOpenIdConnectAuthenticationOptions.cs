@@ -19,6 +19,7 @@ namespace Vipps.Login
             {
                 RoleClaimType = ClaimTypes.Role
             };
+            Notifications = new VippsOpenIdConnectAuthenticationNotifications();
         }
     }
 }
