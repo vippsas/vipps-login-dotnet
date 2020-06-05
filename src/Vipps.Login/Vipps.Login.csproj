@@ -103,6 +103,7 @@
     <Compile Include="Models\VippsAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VippsAuthenticationDefaults.cs" />
+    <Compile Include="VippsClaimTypes.cs" />
     <Compile Include="VippsHelpers.cs" />
     <Compile Include="VippsLoginService.cs" />
     <Compile Include="VippsOpenIdConnectAuthenticationExtensions.cs" />
