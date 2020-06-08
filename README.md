@@ -89,32 +89,76 @@ public class Startup
             LoginPath = new PathString("/user")
         });
 
-        // This will configure Vipps OpenIdConnect middleware for you
-        app.ConfigureVippsAuthentication(new VippsInitAuthenticationOptions
+        // This should match CookieAuthentication AuthenticationType
+        app.SetDefaultSignInAsAuthenticationType(DefaultAuthenticationTypes.ApplicationCookie);
+        app.UseOpenIdConnectAuthentication(new VippsOpenIdConnectAuthenticationOptions
         {
-            // This should match CookieAuthentication AuthenticationType
-            CookieAuthType = DefaultAuthenticationTypes.ApplicationCookie,
             // Your credentials
             ClientId = VippsLoginConfig.ClientId,
             ClientSecret = VippsLoginConfig.ClientSecret,
             Authority = VippsLoginConfig.Authority,
             // Here you pass in the scopes you need
-            Scopes = new[]
+            Scope = string.Join(" ", new []
             {
                 VippsScopes.OpenId,
                 VippsScopes.Email,
                 VippsScopes.Name,
+                VippsScopes.BirthDate,
                 VippsScopes.Address,
-                VippsScopes.PhoneNumber,
-                VippsScopes.BirthDate
-            },
-            SecurityTokenValidated = identity =>
+                VippsScopes.PhoneNumber
+            }),
+            // Various notifications that we can handle during the auth flow
+            // By default it will handle:
+            // RedirectToIdentityProvider - Redirecting to Vipps using correct RedirectUri
+            // AuthorizationCodeReceived - Exchange Authentication code for id_token and access_token
+            // DefaultAuthenticationFailed- Display error message on failed auth
+            Notifications = new VippsOpenIdConnectAuthenticationNotifications
             {
-                // This which will be called after creating the identity and its roles but before syncing to the db.
-                // Can be used to add/delete claims or change other properties
-                // For example to add access to the CMS or to create a user account automatically
-                return Task.FromResult(0);
+                SecurityTokenValidated = async ctx =>
+                {
+                    // Prevent redirecting to external Uris
+                    var redirectUri = new Uri(ctx.AuthenticationTicket.Properties.RedirectUri,
+                        UriKind.RelativeOrAbsolute);
+                    if (redirectUri.IsAbsoluteUri)
+                    {
+                        ctx.AuthenticationTicket.Properties.RedirectUri = redirectUri.PathAndQuery;
+                    }
+
+                    // By default we use email address as username
+                    var identity = ctx.AuthenticationTicket.Identity;
+                    identity.AddClaim(
+                        new Claim(identity.NameClaimType, identity.FindFirst(ClaimTypes.Email)?.Value)
+                    );
+                    // Here you can add extra roles to the user
+                    // For example to allow CMS access:
+                    identity.AddClaim(new Claim(ClaimTypes.Role, EpiApplicationRoles.CmsEditors));
+
+                    // Sync user and the roles to Epi
+                    await ServiceLocator.Current.GetInstance<ISynchronizingUserService>()
+                        .SynchronizeAsync(identity, new List<string>());
+                }
             }
+        });
+        // Trigger Vipps middleware on this path to start authentication
+        app.Map("/vipps-login", map => map.Run(ctx =>
+        {
+            if (ctx.Authentication.User?.Identity == null || !ctx.Authentication.User.Identity.IsAuthenticated)
+            {
+                ctx.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType);
+                return Task.Delay(0);
+            }
+            // Return to this url after authenticating
+            var returnUrl = ctx.Request.Query.Get("ReturnUrl") ?? "/";
+
+            return Task.Run(() => ctx.Response.Redirect(returnUrl));
+        }));
+        app.Map("/vipps-logout", map =>
+        {
+            map.Run(context =>
+            {
+                context.Authentication.SignOut(VippsAuthenticationDefaults.AuthenticationType);
+                return Task.FromResult(0);
+            });
         });
     }
 }
