@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vipps.Login.Episerver.Comme
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{5482D4B0-66EE-40B1-AB75-20BA3F713221}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vipps.Login.Tests", "Vipps.Login.Tests\Vipps.Login.Tests.csproj", "{35E3F5C0-40E1-4A9E-96E0-F319A19CAC3E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vipps.Login.Tests", "test\Vipps.Login.Tests\Vipps.Login.Tests.csproj", "{35E3F5C0-40E1-4A9E-96E0-F319A19CAC3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
