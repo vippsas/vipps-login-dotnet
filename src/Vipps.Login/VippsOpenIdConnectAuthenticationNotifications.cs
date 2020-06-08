@@ -11,6 +11,13 @@ namespace Vipps.Login
 {
     public class VippsOpenIdConnectAuthenticationNotifications : OpenIdConnectAuthenticationNotifications
     {
+        private static HttpClient _httpClient = new HttpClient();
+
+        public VippsOpenIdConnectAuthenticationNotifications(HttpClient httpClient) : this()
+        {
+            _httpClient = httpClient;
+        }
+
         public VippsOpenIdConnectAuthenticationNotifications()
         {
             RedirectToIdentityProvider = DefaultRedirectToIdentityProvider;
@@ -52,7 +59,7 @@ namespace Vipps.Login
                     .ConfigureAwait(false);
 
             var tokenClient = new TokenClient(
-                () => new HttpClient(),
+                () => _httpClient,
                 new TokenClientOptions
                 {
                     Address = configuration.TokenEndpoint,
