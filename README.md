@@ -268,4 +268,16 @@ private void SyncPersonalInfo(IIdentity identity, CustomerContact currentContact
 
 How you store the data is up to you, of course you don't have to store it, you can just extract it from the users' identity as long as they log in using Vipps.
 
+## More info
 
+- https://github.com/vippsas/vipps-login-api
+- https://github.com/vippsas/vipps-developers
+- https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
+
+## Package maintainer
+
+https://github.com/brianweet
+
+## Changelog
+
+[Changelog](CHANGELOG.md)
