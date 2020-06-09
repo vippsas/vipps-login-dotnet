@@ -98,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IVippsLoginService.cs" />
+    <Compile Include="Models\VippsAddressType.cs" />
     <Compile Include="Models\VippsUserInfo.cs" />
     <Compile Include="Models\VippsAddress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

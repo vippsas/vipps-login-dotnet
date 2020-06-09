@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Mediachase.Commerce.Customers;
 using Vipps.Login.Models;
@@ -9,30 +10,43 @@ namespace Vipps.Login.Episerver.Commerce
     {
         public static CustomerAddress FindVippsAddress(this IEnumerable<CustomerAddress> addresses, VippsAddress address)
         {
-           return addresses.FirstOrDefault(x =>
-               x.GetVippsAddressType().Equals(address.AddressType));
+           return FindVippsAddress(addresses, address.AddressType);
         }
 
-        public static CustomerAddress FindAllVippsAddresses(this IEnumerable<CustomerAddress> addresses)
+        public static CustomerAddress FindVippsAddress(this IEnumerable<CustomerAddress> addresses, VippsAddressType addressType)
         {
-            return addresses.FirstOrDefault(x => !string.IsNullOrWhiteSpace(x.GetVippsAddressType()));
+            return addresses
+                .FindAllVippsAddresses()
+                .FirstOrDefault(x =>
+                    x.GetVippsAddressType().Equals(addressType));
         }
 
-        public static void SetVippsAddressType(this CustomerAddress address, string addressType)
+        public static IEnumerable<CustomerAddress> FindAllVippsAddresses(this IEnumerable<CustomerAddress> addresses)
         {
-            address[MetadataConstants.VippsAddressTypeFieldName] = addressType;
+            return addresses.Where(x => x.GetVippsAddressType() != null);
         }
 
-        public static string GetVippsAddressType(this CustomerAddress address)
+        public static void SetVippsAddressType(this CustomerAddress address, VippsAddressType? addressType)
         {
-            return address[MetadataConstants.VippsAddressTypeFieldName]?.ToString() ?? string.Empty;
+            address[MetadataConstants.VippsAddressTypeFieldName] = addressType?.ToString();
         }
 
-        public static void MapAddress(
+        public static VippsAddressType? GetVippsAddressType(this CustomerAddress address)
+        {
+            var stringValue = address[MetadataConstants.VippsAddressTypeFieldName]?.ToString();
+            if (Enum.TryParse(stringValue, out VippsAddressType enumValue))
+            {
+                return enumValue;
+            }
+            return null;
+        }
+
+        public static void MapVippsAddress(
             this CustomerAddress address,
             VippsAddress vippsAddress
         )
         {
+            if (vippsAddress == null) throw new ArgumentNullException(nameof(vippsAddress));
             address.Line1 = vippsAddress.StreetAddress;
             address.City = vippsAddress.Region;
             address.PostalCode = vippsAddress.PostalCode;

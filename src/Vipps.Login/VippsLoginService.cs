@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Principal;
 using IdentityModel;
 using Newtonsoft.Json;
 using Vipps.Login.Models;
@@ -14,6 +15,11 @@ namespace Vipps.Login
         private const string NorwegianLanguageTag = "no";
         public const string VippsTestApi = "https://apitest.vipps.no/";
         public const string VippsProdApi = "https://api.vipps.no/";
+
+        public virtual VippsUserInfo GetVippsUserInfo(IIdentity identity)
+        {
+            return GetVippsUserInfo(identity as ClaimsIdentity);
+        }
 
         public virtual VippsUserInfo GetVippsUserInfo(ClaimsIdentity identity)
         {
@@ -55,6 +61,11 @@ namespace Vipps.Login
             };
         }
 
+        public virtual bool IsVippsIdentity(IIdentity identity)
+        {
+            return IsVippsIdentity(identity as ClaimsIdentity);
+        }
+
         public virtual bool IsVippsIdentity(ClaimsIdentity identity)
         {
             if (identity == null)
@@ -67,7 +78,7 @@ namespace Vipps.Login
             {
                 return false;
             }
-            return validIssuers.Any(validIssuer => validIssuer.StartsWith(issuer.Value));
+            return validIssuers.Any(validIssuer => issuer.Value.StartsWith(validIssuer));
         }
 
         protected virtual IEnumerable<VippsAddress> GetVippsAddresses(ClaimsIdentity identity)
@@ -81,7 +92,7 @@ namespace Vipps.Login
         {
             yield return VippsTestApi;
             yield return VippsProdApi;
-            if (VippsLoginConfig.Authority != null)
+            if (!string.IsNullOrWhiteSpace(VippsLoginConfig.Authority))
             {
                 yield return VippsLoginConfig.Authority;
             }

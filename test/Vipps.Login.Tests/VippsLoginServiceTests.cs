@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using IdentityModel;
+using Vipps.Login.Models;
 using Xunit;
 
 namespace Vipps.Login.Tests
@@ -63,16 +64,16 @@ namespace Vipps.Login.Tests
         }
 
         [Fact]
-        public void HasTwoAddresses()
+        public void HasThreeAddresses()
         {
             var service = new VippsLoginService();
             var identity = CreateIdentity();
-            identity.AddClaims(new[] {_address1, _address2});
+            identity.AddClaims(new[] {_address1, _address2, _address3});
             var userInfo = service.GetVippsUserInfo(identity);
-            Assert.Equal(2, userInfo.Addresses.Count());
-            Assert.Equal(1, userInfo.Addresses.Count(x=>x.AddressType.Equals("home")));
-            Assert.Equal(1, userInfo.Addresses.Count(x => x.AddressType.Equals("work")));
-            Assert.Equal(0, userInfo.Addresses.Count(x => x.AddressType.Equals("other")));
+            Assert.Equal(3, userInfo.Addresses.Count());
+            Assert.Equal(1, userInfo.Addresses.Count(x=>x.AddressType.Equals(VippsAddressType.Home)));
+            Assert.Equal(1, userInfo.Addresses.Count(x => x.AddressType.Equals(VippsAddressType.Work)));
+            Assert.Equal(1, userInfo.Addresses.Count(x => x.AddressType.Equals(VippsAddressType.Other)));
         }
 
         [Fact]
@@ -106,5 +107,6 @@ namespace Vipps.Login.Tests
 
         private readonly Claim _address1 = new Claim(JwtClaimTypes.Address, "{\"address_type\": \"home\",\"country\": \"NO\",\"formatted\": \"BOKS 6300, ETTERSTAD\n0603\nOSLO\nNO\",\"postal_code\": \"0603\",\"region\": \"OSLO\",\"street_address\": \"BOKS 6300, ETTERSTAD\"}");
         private readonly Claim _address2 = new Claim(JwtClaimTypes.Address, "{\"address_type\": \"work\",\"country\": \"NO\",\"formatted\": \"Skippergata 4\n0152\nOslo\nNO\",\"postal_code\": \"0152\",\"region\": \"Oslo\",\"street_address\": \"Skippergata 4\"}");
+        private readonly Claim _address3 = new Claim(JwtClaimTypes.Address, "{\"address_type\":\"other\",\"country\":\"NO\",\"formatted\":\"Rådhusgata 28\nBar 3\n0151\nOslo\nNO\",\"postal_code\":\"0151\",\"region\":\"Oslo\",\"street_address\":\"Rådhusgata 28\nBar 3\"}");
     }
 }

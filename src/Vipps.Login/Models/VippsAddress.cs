@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Vipps.Login.Models
 {
@@ -12,6 +13,7 @@ namespace Vipps.Login.Models
         public string Country { get; set; }
         public string Formatted { get; set; }
         [JsonProperty("address_type")]
-        public string AddressType { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public VippsAddressType AddressType { get; set; }
     }
 }
