@@ -219,6 +219,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddressExtensions.cs" />
+    <Compile Include="CustomerContactExtensions.cs" />
     <Compile Include="Initialization\MetadataInitialization.cs" />
     <Compile Include="MetadataConstants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

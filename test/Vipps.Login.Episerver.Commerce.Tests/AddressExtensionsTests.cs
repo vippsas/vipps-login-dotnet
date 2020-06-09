@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Vipps.Login.Episerver.Commerce.Tests
 {
-    public class VippsOpenIdConnectAuthenticationNotificationsTests
+    public class AddressExtensionsTests
     {
         [Fact]
         public void FindsNoAddressIfEmptyList()
