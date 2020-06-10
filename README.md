@@ -30,17 +30,22 @@ And for the Episerver extensions
 
 ### Get API keys for Vipps Log In API
 
-Get credentials from Vipps:
-https://github.com/vippsas/vipps-developers/blob/master/vipps-getting-started.md#getting-the-api-keys
-And configure them in your web config:
+Activate and set up Vipps Login: https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login
+
+Configure a redirect URI to your site(s): `https://{your-site}/vipps-login` (fill in the correct url there, it can be localhost as well)
+
+Add the ClientId and the ClientSecret to the AppSettings, as such:
+
 ```
 <add key="VippsLogin:ClientId" value="..." />
 <add key="VippsLogin:ClientSecret" value="..." />
-// Use the test url
 <add key="VippsLogin:Authority" value="https://apitest.vipps.no/access-management-1.0/access" />
-// Or use the production url
+```
+For production use
+```
 <add key="VippsLogin:Authority" value="https://api.vipps.no/access-management-1.0/access" />
 ```
+See https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#base-urls
 
 ### Prepare Episerver for OpenID Connect
 
@@ -180,8 +185,9 @@ public class Startup
 }
 ```
 
-When the user goes to the path `https://your-site/vipps-login`, the Vipps middleware will be triggered and it will redirect the user to the Vipps log in environment. You will have to configure this redirect URL in Vipps, as described here: https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login
-You can add a ReturnUrl to redirect the user once they are logged in, for example `https://your-site/vipps-login?ReturnUrl=/vipps-landing`.
+When the user goes to the path `https://{your-site}/vipps-login`, the Vipps middleware will be triggered and it will redirect the user to the Vipps log in environment. You will have to configure this redirect URL in Vipps, as described here: https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login
+
+You can add a ReturnUrl to redirect the user once they are logged in, for example `https://{your-site}/vipps-login?ReturnUrl=/vipps-landing`.
 
 Vipps is using the OpenIdConnect Authorization Code Grant flow, this means the user is redirected back to your environment with a Authorization token. The middleware will validate the token and exchange it for an `id_token` and an `access_token`. A `ClaimsIdentity` will be created which will contain the information of the scopes that you configured (email, name, addresses etc).
 
