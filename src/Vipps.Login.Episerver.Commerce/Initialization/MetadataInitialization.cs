@@ -13,7 +13,6 @@ namespace Vipps.Login.Episerver.Commerce.Initialization
         public void Initialize(InitializationEngine context)
         {
             CreateMetaField(AddressEntity.ClassName, MetadataConstants.VippsAddressTypeFieldName, MetadataConstants.VippsAddressTypeFriendlyName);
-
             CreateGuidMetaField(ContactEntity.ClassName, MetadataConstants.VippsSubjectGuidFieldName, MetadataConstants.VippsSubjectGuidFriendlyName);
         }
 
@@ -29,7 +28,6 @@ namespace Vipps.Login.Episerver.Commerce.Initialization
             {
                 metaFieldBuilder.MetaClass.AccessLevel = AccessLevel.Customization;
                 metaFieldBuilder.CreateText(metaFieldName, friendlyName, isNullable, maxLength, isUnique);
-                metaFieldBuilder.CreateGuid(metaFieldName, friendlyName, isNullable);
                 metaFieldBuilder.SaveChanges();
             }
         }

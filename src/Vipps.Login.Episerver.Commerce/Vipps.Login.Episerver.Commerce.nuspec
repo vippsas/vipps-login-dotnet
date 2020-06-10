@@ -9,5 +9,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Vipps Login for Episerver</description>
     <tags>Geta Vipps Login Episerver</tags>
+    <dependencies>
+      <dependency id="Vipps.Login" version="$version$" />
+      <dependency id="Vipps.Login.Episerver" version="$version$" />
+    </dependencies>
   </metadata>
 </package>
