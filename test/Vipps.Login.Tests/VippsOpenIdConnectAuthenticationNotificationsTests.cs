@@ -32,7 +32,7 @@ namespace Vipps.Login.Tests
 
             var notification = new AuthorizationCodeReceivedNotification(
                 A.Fake<IOwinContext>(),
-                new VippsOpenIdConnectAuthenticationOptions
+                new VippsOpenIdConnectAuthenticationOptions("clientId", "clientSecret", "authority")
                 {
                     ConfigurationManager = configurationManager
                 })
@@ -65,7 +65,7 @@ namespace Vipps.Login.Tests
 
             var notification = new AuthorizationCodeReceivedNotification(
                 A.Fake<IOwinContext>(),
-                new VippsOpenIdConnectAuthenticationOptions
+                new VippsOpenIdConnectAuthenticationOptions("clientId", "clientSecret", "authority")
                 {
                     ConfigurationManager = configurationManager
                 })

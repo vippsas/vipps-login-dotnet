@@ -122,6 +122,7 @@
   <ItemGroup>
     <Compile Include="VippsLoginServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VippsOpenIdConnectAuthenticationOptionsTests.cs" />
     <Compile Include="VippsOpenIdConnectAuthenticationNotificationsTests.cs" />
   </ItemGroup>
   <ItemGroup>
