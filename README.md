@@ -140,7 +140,7 @@ public class Startup
 
                     // Here you can add extra roles to the user
                     // For example to allow CMS access:
-                    // identity.AddClaim(new Claim(ClaimTypes.Role, EpiApplicationRoles.CmsEditors));
+                    // identity.AddClaim(new Claim(ClaimTypes.Role, "WebEditors"));
 
                     // You can also create an application user here
                     // Or automatically sync all Vipps data
@@ -172,6 +172,10 @@ public class Startup
                 return Task.FromResult(0);
             });
         });
+
+        // Required for AntiForgery to work
+        // Otherwise it'll throw an exception about missing claims
+        AntiForgeryConfig.UniqueClaimTypeIdentifier = ClaimTypes.Name;
     }
 }
 ```
@@ -190,80 +194,68 @@ If you want to use the Vipps data, for example the Vipps addresses, you may want
 ```csharp
 public class VippsPageController : PageController<VippsPage>
 {
-  private readonly IVippsLoginService _vippsLoginService;
-  private readonly CustomerContext _customerContext;
-  public VippsPageController(IVippsLoginService vippsLoginService, CustomerContext customerContext)
-  {
-    _vippsLoginService = vippsLoginService;
-    _customerContext = customerContext;
-  }
-
-  public async Task<ActionResult> Index(VippsPage currentPage, bool? autoSync)
-  {
-    var userInfo = _vippsLoginService.GetVippsUserInfo(User.Identity);
-    SyncAddresses(User.Identity, _customerContext.Current);
-  }
-
-  private void SyncAddresses(IIdentity identity, CustomerContact currentContact)
-  {
-    if (identity == null) throw new ArgumentNullException(nameof(identity));
-    if (currentContact == null) throw new ArgumentNullException(nameof(currentContact));
-    var vippsUserInfo = _vippsLoginService.GetVippsUserInfo(identity);
-    if (vippsUserInfo == null)
+    private readonly IVippsLoginService _vippsLoginService;
+    private readonly CustomerContext _customerContext;
+    public VippsPageController(IVippsLoginService vippsLoginService, CustomerContext customerContext)
     {
-        return;
+        _vippsLoginService = vippsLoginService;
+        _customerContext = customerContext;
     }
-    foreach (var vippsAddress in vippsUserInfo.Addresses)
+
+    public ActionResult Index(VippsPage currentPage)
     {
-        // Vipps addresses don't have an ID
-        // They can be identifier by Vipps address type
-        var address =
-            currentContact.ContactAddresses.FindVippsAddress(vippsAddress.AddressType);
-        var isNewAddress = address == null;
-        if (isNewAddress)
-        {
-            address = CustomerAddress.CreateInstance();
-            address.AddressType = CustomerAddressTypeEnum.Shipping;
-        }
-
-        // Maps fields onto customer address:
-        // Vipps address type, street, city, postalcode, countrycode
-        address.MapVippsAddress(vippsAddress);
-
-        if (isNewAddress)
-        {
-            currentContact.AddContactAddress(address);
-        }
-        else
-        {
-            currentContact.UpdateContactAddress(address);
-        }
+        SyncPersonalInfo(User.Identity, _customerContext.CurrentContact);
+        return View();
     }
-    currentContact.SaveChanges();
-  }
+
+    private void SyncPersonalInfo(IIdentity identity, CustomerContact currentContact)
+    {
+        if (identity == null)
+            throw new ArgumentNullException(nameof(identity));
+        if (currentContact == null)
+            throw new ArgumentNullException(nameof(currentContact));
+        var vippsUserInfo = _vippsLoginService.GetVippsUserInfo(identity);
+        if (vippsUserInfo == null)
+        {
+            return;
+        }
+
+        // Maps PII fields onto customer contact:
+        // Vipps subject guid, email, firstname, lastname, fullname, birthdate
+        currentContact.MapVippsUserInfo(vippsUserInfo);
+
+        // Sync addresses
+        foreach (var vippsAddress in vippsUserInfo.Addresses)
+        {
+            // Vipps addresses don't have an ID
+            // They can be identifier by Vipps address type
+            var address =
+                currentContact.ContactAddresses.FindVippsAddress(vippsAddress.AddressType);
+            var isNewAddress = address == null;
+            if (isNewAddress)
+            {
+                address = CustomerAddress.CreateInstance();
+                address.AddressType = CustomerAddressTypeEnum.Shipping;
+            }
+
+            // Maps fields onto customer address:
+            // Vipps address type, street, city, postalcode, countrycode
+            address.MapVippsAddress(vippsAddress);
+
+            if (isNewAddress)
+            {
+                currentContact.AddContactAddress(address);
+            }
+            else
+            {
+                currentContact.UpdateContactAddress(address);
+            }
+        }
+
+        currentContact.SaveChanges();
+    }
 }
 
-```
-
-Similarly, you can decide to store user info on the customer contact:
-
-```csharp
-private void SyncPersonalInfo(IIdentity identity, CustomerContact currentContact)
-{
-    if (identity == null) throw new ArgumentNullException(nameof(identity));
-    if (currentContact == null) throw new ArgumentNullException(nameof(currentContact));
-    var vippsUserInfo = _vippsLoginService.GetVippsUserInfo(identity);
-    if (vippsUserInfo == null)
-    {
-        return;
-    }
-
-    // Maps fields onto customer contact:
-    // Vipps subject guid, email, firstname, lastname, fullname, birthdate
-    currentContact.MapVippsUserInfo(vippsUserInfo);
-
-    currentContact.SaveChanges();
-}
 ```
 
 How you store the data is up to you, of course you don't have to store it, you can just extract it from the users' identity as long as they log in using Vipps.
@@ -273,6 +265,7 @@ How you store the data is up to you, of course you don't have to store it, you c
 - https://github.com/vippsas/vipps-login-api
 - https://github.com/vippsas/vipps-developers
 - https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
+- https://world.episerver.com/documentation/developer-guides/commerce/security/support-for-openid-connect-in-episerver-commerce/
 
 ## Package maintainer
 
