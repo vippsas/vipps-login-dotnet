@@ -102,12 +102,12 @@ public class Startup
         // Vipps OIDC configuration starts here
         // This should match CookieAuthentication AuthenticationType above ^
         app.SetDefaultSignInAsAuthenticationType(DefaultAuthenticationTypes.ApplicationCookie);
-        app.UseOpenIdConnectAuthentication(new VippsOpenIdConnectAuthenticationOptions
+        app.UseOpenIdConnectAuthentication(new VippsOpenIdConnectAuthenticationOptions(
+            VippsLoginConfig.ClientId,
+            VippsLoginConfig.ClientSecret,
+            VippsLoginConfig.Authority
+            )
         {
-            // Your credentials
-            ClientId = VippsLoginConfig.ClientId,
-            ClientSecret = VippsLoginConfig.ClientSecret,
-            Authority = VippsLoginConfig.Authority,
             // Here you pass in the scopes you need
             Scope = string.Join(" ", new []
             {
