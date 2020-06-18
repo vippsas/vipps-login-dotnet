@@ -197,7 +197,7 @@ The Vipps UserInfo can be accessed by calling `IVippsLoginService.GetVippsUserIn
 
 ### Syncing Vipps user data
 
-You may want to store the Vipps data in your database, for example on the Episerver CustomerContact. First, make sure you can access the data you're looking for by configuring the correct scope in your Startup class, for example for Vipps addressess add the `VippsScopes.Address` scope. Once the user has logged in, their `ClaimsIdentity` will contain all the Vipps data you have requested through the scopes. To retrieve these addresses you can use the same `IVippsLoginService.GetVippsUserInfo(IIdentity identity)` to retrieve their UserInfo; including the addresses. If you're using Episerver Commerce, install `Vipps.Login.Episerver.Commerce` and take a look at the Epi page controller example below:
+You may want to store the Vipps data in your database, for example on the Episerver CustomerContact. First, make sure you can access the data you're looking for by configuring the correct scope in your Startup class, for example for Vipps addresses add the `VippsScopes.Address` scope. Once the user has logged in, their `ClaimsIdentity` will contain all the Vipps data you have requested through the scopes. To retrieve these addresses you can use the same `IVippsLoginService.GetVippsUserInfo(IIdentity identity)` to retrieve their UserInfo; including the addresses. If you're using Episerver Commerce, install `Vipps.Login.Episerver.Commerce` and take a look at the Epi page controller example below:
 
 ```csharp
 public class VippsPageController : PageController<VippsPage>
