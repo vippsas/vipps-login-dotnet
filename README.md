@@ -1,8 +1,8 @@
-# Vipps Login
+# Vipps Log In OIDC Authentication middleware for ASP.NET and Episerver
 
 ## Description
 
-This repository contains the code to use Vipps Log In OpenIdConnect (OIDC) Authorization in your ASP.NET application. Information about the Vipps Log In API can be found here: https://github.com/vippsas/vipps-login-api
+This repository contains the code to use Vipps Log In OpenIdConnect (OIDC) Authentication middleware in your ASP.NET application using OWIN. Information about the Vipps Log In API can be found here: https://github.com/vippsas/vipps-login-api
 
 This repository consists of three NuGet packages:
 
@@ -191,11 +191,13 @@ You can add a ReturnUrl to redirect the user once they are logged in, for exampl
 
 Vipps is using the OpenIdConnect Authorization Code Grant flow, this means the user is redirected back to your environment with a Authorization token. The middleware will validate the token and exchange it for an `id_token` and an `access_token`. A `ClaimsIdentity` will be created which will contain the information of the scopes that you configured (email, name, addresses etc).
 
-The Vipps UserInfo can be accessed by calling `IVippsLoginService.GetVippsUserInfo(ClaimsIdentity identity)`, this will give you the user info that was retrieved when the user logged in (cached).
+### Accessing Vipps user data
+
+The Vipps UserInfo can be accessed by calling `IVippsLoginService.GetVippsUserInfo(IIdentity identity)`, this will give you the user info that was retrieved when the user logged in (cached).
 
 ### Syncing Vipps user data
 
-If you want to use the Vipps data, for example the Vipps addresses, you may want to store that data in your database. First, make sure you can access the data you're looking for by configuring the correct scope in your Startup class, for example add the `VippsScopes.Address` scope. Once the user has logged in, their `ClaimsIdentity` will contain all the Vipps data you have requested through the scopes. To retrieve these addresses you can use the same `IVippsLoginService.GetVippsUserInfo(ClaimsIdentity identity)` to retrieve their UserInfo; including the addresses. If you're using Episerver commerce, install `Vipps.Login.Episerver.Commerce` and take a look at the Epi page controller example below:
+You may want to store the Vipps data in your database, for example on the Episerver CustomerContact. First, make sure you can access the data you're looking for by configuring the correct scope in your Startup class, for example for Vipps addressess add the `VippsScopes.Address` scope. Once the user has logged in, their `ClaimsIdentity` will contain all the Vipps data you have requested through the scopes. To retrieve these addresses you can use the same `IVippsLoginService.GetVippsUserInfo(IIdentity identity)` to retrieve their UserInfo; including the addresses. If you're using Episerver Commerce, install `Vipps.Login.Episerver.Commerce` and take a look at the Epi page controller example below:
 
 ```csharp
 public class VippsPageController : PageController<VippsPage>
@@ -220,6 +222,8 @@ public class VippsPageController : PageController<VippsPage>
             throw new ArgumentNullException(nameof(identity));
         if (currentContact == null)
             throw new ArgumentNullException(nameof(currentContact));
+
+        // Retrieve Vipps user info
         var vippsUserInfo = _vippsLoginService.GetVippsUserInfo(identity);
         if (vippsUserInfo == null)
         {
