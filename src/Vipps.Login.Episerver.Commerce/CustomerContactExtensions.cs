@@ -16,18 +16,6 @@ namespace Vipps.Login.Episerver.Commerce
             return contact[MetadataConstants.VippsSubjectGuidFieldName] as Guid?;
         }
 
-        public static void MapVippsUserInfo(
-            this CustomerContact contact,
-            VippsUserInfo userInfo
-        )
-        {
-            if (userInfo == null) throw new ArgumentNullException(nameof(userInfo));
-            contact.Email = userInfo.Email;
-            contact.FirstName = userInfo.GivenName;
-            contact.LastName = userInfo.FamilyName;
-            contact.FullName = userInfo.Name;
-            contact.BirthDate = userInfo.BirthDate;
-            contact.SetVippsSubject(userInfo.Sub);
-        }
+        
     }
 }

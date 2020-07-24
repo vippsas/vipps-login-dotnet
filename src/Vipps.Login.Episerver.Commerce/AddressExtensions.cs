@@ -40,18 +40,5 @@ namespace Vipps.Login.Episerver.Commerce
             }
             return null;
         }
-
-        public static void MapVippsAddress(
-            this CustomerAddress address,
-            VippsAddress vippsAddress
-        )
-        {
-            if (vippsAddress == null) throw new ArgumentNullException(nameof(vippsAddress));
-            address.Line1 = vippsAddress.StreetAddress;
-            address.City = vippsAddress.Region;
-            address.PostalCode = vippsAddress.PostalCode;
-            address.CountryCode = vippsAddress.Country;
-            address.SetVippsAddressType(vippsAddress.AddressType);
-        }
     }
 }
