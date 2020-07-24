@@ -5,6 +5,7 @@ using System.Security.Principal;
 using Mediachase.BusinessFoundation.Data;
 using Mediachase.BusinessFoundation.Data.Business;
 using Mediachase.Commerce.Customers;
+using Vipps.Login.Episerver.Commerce.Extensions;
 using Vipps.Login.Models;
 
 namespace Vipps.Login.Episerver.Commerce

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Mediachase.Commerce.Customers;
+using Vipps.Login.Episerver.Commerce.Extensions;
 using Vipps.Login.Models;
 using Xunit;
 

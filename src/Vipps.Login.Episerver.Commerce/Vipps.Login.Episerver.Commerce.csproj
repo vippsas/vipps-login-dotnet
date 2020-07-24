@@ -251,8 +251,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddressExtensions.cs" />
-    <Compile Include="CustomerContactExtensions.cs" />
+    <Compile Include="Extensions\AddressExtensions.cs" />
+    <Compile Include="Extensions\CustomerContactExtensions.cs" />
     <Compile Include="Initialization\MetadataInitialization.cs" />
     <Compile Include="Initialization\VippsLoginCommerceInitialization.cs" />
     <Compile Include="IVippsLoginCommerceService.cs" />

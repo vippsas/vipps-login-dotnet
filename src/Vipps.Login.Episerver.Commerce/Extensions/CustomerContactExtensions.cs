@@ -1,8 +1,7 @@
 ﻿using System;
 using Mediachase.Commerce.Customers;
-using Vipps.Login.Models;
 
-namespace Vipps.Login.Episerver.Commerce
+namespace Vipps.Login.Episerver.Commerce.Extensions
 {
     public static class CustomerContactExtensions
     {
