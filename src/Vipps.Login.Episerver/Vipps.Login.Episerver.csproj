@@ -147,7 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VippsLoginInitialization.cs" />
+    <Compile Include="VippsLoginEpiserverInitialization.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vipps.Login\Vipps.Login.csproj">
