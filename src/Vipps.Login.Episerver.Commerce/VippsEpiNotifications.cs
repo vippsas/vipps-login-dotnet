@@ -55,8 +55,8 @@ namespace Vipps.Login.Episerver.Commerce
                 }
                 else if (contacts.Length > 1)
                 {
-                    throw new OpenIdConnectProtocolException(
-                        "Multiple accounts found matching your Vipps info."
+                    throw new VippsLoginDuplicateAccountException(
+                        "Multiple accounts found matching your Vipps info. Please log in and link your account through your profile page."
                     );
                 }
             }
