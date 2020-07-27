@@ -115,40 +115,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             Assert.Equal(VippsAddressType.Home, customerAddress.GetVippsAddressType());
         }
 
-        [Fact]
-        public void MapVippsAddressThrowsIfNull()
-        {
-            var customerAddress = CustomerAddress.CreateInstance();
-
-            Assert.Throws<ArgumentNullException>(() => customerAddress.MapVippsAddress(null));
-        }
-
-        [Fact]
-        public void MapVippsAddress()
-        {
-            var customerAddress = CustomerAddress.CreateInstance();
-
-            var vippsAddressType = VippsAddressType.Work;
-            var vippsStreetAddress = "Vipps Street Address";
-            var region = "Oslo";
-            var country = "NO";
-            var postalCode = "0151";
-
-            customerAddress.MapVippsAddress(new VippsAddress
-            {
-                AddressType = vippsAddressType,
-                StreetAddress = vippsStreetAddress,
-                Region = region,
-                Country = country,
-                PostalCode = postalCode
-            });
-
-            Assert.Equal(vippsAddressType, customerAddress.GetVippsAddressType());
-            Assert.Equal(vippsStreetAddress, customerAddress.Line1);
-            Assert.Equal(region, customerAddress.City);
-            Assert.Equal(country, customerAddress.CountryCode);
-            Assert.Equal(postalCode, customerAddress.PostalCode);
-        }
+       
         private CustomerAddress CreateVippsAddress(VippsAddressType addressType)
         {
             var vippsAddress = CustomerAddress.CreateInstance();
