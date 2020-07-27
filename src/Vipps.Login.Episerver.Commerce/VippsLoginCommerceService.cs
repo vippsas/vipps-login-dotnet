@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Mediachase.BusinessFoundation.Data;
+using Mediachase.BusinessFoundation.Data.Business;
+using Mediachase.Commerce.Customers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
-using Mediachase.BusinessFoundation.Data;
-using Mediachase.BusinessFoundation.Data.Business;
-using Mediachase.Commerce.Customers;
 using Vipps.Login.Episerver.Commerce.Extensions;
 using Vipps.Login.Models;
 
@@ -36,8 +36,7 @@ namespace Vipps.Login.Episerver.Commerce
 
         public IEnumerable<CustomerContact> FindCustomerContacts(string email, string phone)
         {
-            //TODO: search on phone number
-            return BusinessManager
+            var byEmail = BusinessManager
                 .List(ContactEntity.ClassName, new[]
                 {
                     new FilterElement(
@@ -45,18 +44,53 @@ namespace Vipps.Login.Episerver.Commerce
                         FilterElementType.Equal,
                         email
                     )
-                })
+                }, new SortingElement[0], 0, 2)
                 .OfType<CustomerContact>();
+
+            var byPhone = BusinessManager
+               .List(ContactEntity.ClassName, new[]
+               {
+                    new OrBlockFilterElement(new FilterElement(
+                        "DaytimePhoneNumber",
+                        FilterElementType.Equal,
+                        email
+                    ),
+                    new FilterElement(
+                        "EveningPhoneNumber",
+                        FilterElementType.Equal,
+                        email
+                    ))
+               }, new SortingElement[0], 0, 2)
+               .OfType<CustomerAddress>()
+               .Select(x => x.ContactId)
+               .Where(x => x.HasValue)
+               .Select(x => BusinessManager.Load(ContactEntity.ClassName, x.Value))
+               .OfType<CustomerContact>();
+
+            // return distinct list
+            return byEmail
+                .Union(byPhone)
+                .Where(x => x.PrimaryKeyId.HasValue)
+                .GroupBy(x => x.PrimaryKeyId)
+                .Select(x => x.First());
         }
 
         public void SyncInfo(IIdentity identity, CustomerContact currentContact, VippsSyncOptions options = default)
         {
             if (identity == null)
+            {
                 throw new ArgumentNullException(nameof(identity));
+            }
+
             if (currentContact == null)
+            {
                 throw new ArgumentNullException(nameof(currentContact));
+            }
+
             if (options == null)
+            {
                 options = new VippsSyncOptions();
+            }
 
             var vippsUserInfo = _vippsLoginService.GetVippsUserInfo(identity);
             if (vippsUserInfo == null)
@@ -87,9 +121,14 @@ namespace Vipps.Login.Episerver.Commerce
             CustomerAddressTypeEnum addressType)
         {
             if (identity == null)
+            {
                 throw new ArgumentNullException(nameof(identity));
+            }
+
             if (currentContact == null)
+            {
                 throw new ArgumentNullException(nameof(currentContact));
+            }
 
             var vippsUserInfo = _vippsLoginService.GetVippsUserInfo(identity);
             if (vippsUserInfo == null)
@@ -131,7 +170,10 @@ namespace Vipps.Login.Episerver.Commerce
             VippsUserInfo userInfo
         )
         {
-            if (userInfo == null) throw new ArgumentNullException(nameof(userInfo));
+            if (userInfo == null)
+            {
+                throw new ArgumentNullException(nameof(userInfo));
+            }
 
             contact.Email = userInfo.Email;
             contact.FirstName = userInfo.GivenName;
@@ -145,7 +187,10 @@ namespace Vipps.Login.Episerver.Commerce
             VippsAddress vippsAddress
         )
         {
-            if (vippsAddress == null) throw new ArgumentNullException(nameof(vippsAddress));
+            if (vippsAddress == null)
+            {
+                throw new ArgumentNullException(nameof(vippsAddress));
+            }
 
             address.Name = $"Vipps - {address.GetVippsAddressType()}";
             address.Line1 = vippsAddress.StreetAddress;
