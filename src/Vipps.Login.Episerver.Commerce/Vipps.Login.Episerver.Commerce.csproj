@@ -253,6 +253,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\VippsLoginException.cs" />
     <Compile Include="Extensions\AddressExtensions.cs" />
     <Compile Include="Extensions\CustomerContactExtensions.cs" />
     <Compile Include="Initialization\MetadataInitialization.cs" />
@@ -265,7 +266,7 @@
     <Compile Include="VippsLoginCommerceService.cs" />
     <Compile Include="VippsEpiNotifications.cs" />
     <Compile Include="VippsLoginDataLoader.cs" />
-    <Compile Include="VippsLoginDuplicateAccountException.cs" />
+    <Compile Include="Exceptions\VippsLoginDuplicateAccountException.cs" />
     <Compile Include="VippsLoginMapper.cs" />
     <Compile Include="VippsSyncOptions.cs" />
   </ItemGroup>

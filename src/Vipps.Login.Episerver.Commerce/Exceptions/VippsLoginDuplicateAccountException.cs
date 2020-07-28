@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Vipps.Login.Episerver.Commerce
+namespace Vipps.Login.Episerver.Commerce.Exceptions
 {
     public class VippsLoginDuplicateAccountException : Exception
     {

@@ -122,6 +122,5 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             vippsAddress.SetVippsAddressType(addressType);
             return vippsAddress;
         }
-
     }
 }

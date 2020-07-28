@@ -2,32 +2,59 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
+using EPiServer.Logging;
 using EPiServer.Security;
 using EPiServer.ServiceLocation;
 using Mediachase.Commerce.Customers;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Owin.Security.Notifications;
 using Microsoft.Owin.Security.OpenIdConnect;
+using Vipps.Login.Episerver.Commerce.Exceptions;
 using Vipps.Login.Models;
 
 namespace Vipps.Login.Episerver.Commerce
 {
     public class VippsEpiNotifications : VippsOpenIdConnectAuthenticationNotifications
     {
+        private static readonly ILogger Logger = LogManager.GetLogger(typeof(VippsEpiNotifications));
+
 #pragma warning disable 649
-        private Injected<IVippsLoginService> _vippsLoginService;
-        private Injected<VippsLoginCommerceService> _vippsCommerceService;
-        private Injected<MapUserKey> _mapUserKey;
+        private Injected<ISynchronizingUserService> _synchronizingUserServiceAccessor;
+        private Injected<IVippsLoginService> _vippsLoginServiceAccessor;
+        private Injected<IVippsLoginCommerceService> _vippsCommerceServiceAccessor;
+        private Injected<MapUserKey> _mapUserKeyAccessor;
 #pragma warning restore 649
+
+        private readonly ISynchronizingUserService _synchronizingUserService;
+        private readonly IVippsLoginService _vippsLoginService;
+        private readonly IVippsLoginCommerceService _vippsCommerceService;
+        private readonly MapUserKey _mapUserKey;
 
         public VippsEpiNotifications()
         {
             SecurityTokenValidated = DefaultSecurityTokenValidated;
+            _synchronizingUserService = _synchronizingUserServiceAccessor.Service;
+            _vippsLoginService = _vippsLoginServiceAccessor.Service;
+            _vippsCommerceService = _vippsCommerceServiceAccessor.Service;
+            _mapUserKey = _mapUserKeyAccessor.Service;
         }
 
-        private async Task DefaultSecurityTokenValidated(
+        public VippsEpiNotifications(
+            ISynchronizingUserService synchronizingUserService,
+            IVippsLoginService vippsLoginService,
+            IVippsLoginCommerceService vippsLoginCommerceService,
+            MapUserKey mapUserKey
+                )
+        {
+            SecurityTokenValidated = DefaultSecurityTokenValidated;
+            _synchronizingUserService = synchronizingUserService;
+            _vippsLoginService = vippsLoginService;
+            _vippsCommerceService = vippsLoginCommerceService;
+            _mapUserKey = mapUserKey;
+        }
+
+        public async Task DefaultSecurityTokenValidated(
             SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context
         )
         {
@@ -40,10 +67,16 @@ namespace Vipps.Login.Episerver.Commerce
             }
 
             var identity = context.AuthenticationTicket.Identity;
-            var vippsInfo = _vippsLoginService.Service.GetVippsUserInfo(identity);
+            var vippsInfo = _vippsLoginService.GetVippsUserInfo(identity);
+            if (vippsInfo == null)
+            {
+                var message = "Could not retrieve Vipps UserInfo from the provided identity";
+                Logger.Error($"Vipps.Login: {message}");
+                throw new VippsLoginException(message);
+            }
 
             // First check if we already have a contact for this sub
-            var emailAddress = FindBySubjectGuid(vippsInfo?.Sub);
+            var emailAddress = FindBySubjectGuid(vippsInfo.Sub);
             if (string.IsNullOrWhiteSpace(emailAddress))
             {
                 // Try to find contact by vipps email/phone number
@@ -55,19 +88,19 @@ namespace Vipps.Login.Episerver.Commerce
                 }
                 else if (contacts.Length > 1)
                 {
-                    throw new VippsLoginDuplicateAccountException(
-                        "Multiple accounts found matching your Vipps info. Please log in and link your account through your profile page."
-                    );
+                    var message = "Multiple accounts found matching this Vipps UserInfo";
+                    Logger.Warning($"Vipps.Login: {message}. Subject Guid: {vippsInfo.Sub}");
+                    throw new VippsLoginDuplicateAccountException(message);
                 }
             }
 
             // New user
             if (string.IsNullOrWhiteSpace(emailAddress))
             {
-                emailAddress = identity.FindFirst(ClaimTypes.Email)?.Value;
+                emailAddress = vippsInfo.Email;
             }
 
-            // By default we use email address as username
+            // By default Epi will use email address as username
             if (!identity.HasClaim(x => x.Type.Equals(identity.NameClaimType)))
             {
                 identity.AddClaim(
@@ -76,13 +109,13 @@ namespace Vipps.Login.Episerver.Commerce
             }
 
             // Sync user and the roles to Epi
-            await ServiceLocator.Current.GetInstance<ISynchronizingUserService>()
+            await _synchronizingUserService
                 .SynchronizeAsync(identity, new List<string>());
         }
 
         private IEnumerable<CustomerContact> FindByVippsInfo(VippsUserInfo vippsInfo)
         {
-            return _vippsCommerceService.Service.FindCustomerContacts(vippsInfo.Email, vippsInfo.PhoneNumber);
+            return _vippsCommerceService.FindCustomerContacts(vippsInfo.Email, vippsInfo.PhoneNumber);
         }
 
         protected virtual string FindBySubjectGuid(Guid? subjectGuid)
@@ -92,14 +125,14 @@ namespace Vipps.Login.Episerver.Commerce
                 return null;
             }
 
-            var customerContact = _vippsCommerceService.Service
+            var customerContact = _vippsCommerceService
                 .FindCustomerContact(subjectGuid.Value);
             return customerContact == null ? null : GetLoginEmailFromContact(customerContact);
         }
 
         private string GetLoginEmailFromContact(CustomerContact customerContact)
         {
-            return _mapUserKey.Service.ToUserKey(customerContact?.UserId)?.ToString();
+            return _mapUserKey.ToUserKey(customerContact?.UserId)?.ToString();
         }
     }
 }
