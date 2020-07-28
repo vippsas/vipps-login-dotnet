@@ -7,7 +7,7 @@ namespace Vipps.Login.Episerver.Commerce
 {
     public interface IVippsLoginCommerceService
     {
-        IEnumerable<CustomerContact> FindCustomerContacts(Guid subjectGuid);
+        CustomerContact FindCustomerContact(Guid subjectGuid);
         IEnumerable<CustomerContact> FindCustomerContacts(string email, string phone);
         void SyncInfo(IIdentity identity, CustomerContact currentContact, VippsSyncOptions options = default);
     }

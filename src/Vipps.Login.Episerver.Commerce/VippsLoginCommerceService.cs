@@ -1,48 +1,44 @@
-﻿using Mediachase.BusinessFoundation.Data;
-using Mediachase.BusinessFoundation.Data.Business;
-using Mediachase.Commerce.Customers;
+﻿using Mediachase.Commerce.Customers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
+using EPiServer.Logging;
 using Vipps.Login.Episerver.Commerce.Extensions;
-using Vipps.Login.Models;
 
 namespace Vipps.Login.Episerver.Commerce
 {
     public class VippsLoginCommerceService : IVippsLoginCommerceService
     {
-        private static readonly EPiServer.Logging.ILogger Logger = LogManager.GetLogger(typeof(VippsLoginCommerceService));
-
+        private static readonly ILogger Logger = LogManager.GetLogger(typeof(VippsLoginCommerceService));
         private readonly IVippsLoginService _vippsLoginService;
-        private readonly MapUserKey _mapUserKey;
+        private readonly IVippsLoginMapper _vippsLoginMapper;
+        private readonly IVippsLoginDataLoader _vippsLoginDataLoader;
 
         public VippsLoginCommerceService(
             IVippsLoginService vippsLoginService,
-            MapUserKey mapUserKey)
+            IVippsLoginMapper vippsLoginMapper,
+            IVippsLoginDataLoader vippsLoginDataLoader)
         {
             _vippsLoginService = vippsLoginService;
-            _mapUserKey = mapUserKey;
+            _vippsLoginMapper = vippsLoginMapper;
+            _vippsLoginDataLoader = vippsLoginDataLoader;
         }
 
-        public IEnumerable<CustomerContact> FindCustomerContacts(Guid subjectGuid)
+        public CustomerContact FindCustomerContact(Guid subjectGuid)
         {
-            return BusinessManager
-                .List(ContactEntity.ClassName, new[]
-                {
-                    new FilterElement(
-                        MetadataConstants.VippsSubjectGuidFieldName,
-                        FilterElementType.Equal,
-                        subjectGuid
-                    )
-                })
-                .OfType<CustomerContact>();
+            var contacts = _vippsLoginDataLoader.FindContactsBySubjectGuid(subjectGuid).ToList();
+            if (contacts.Count() > 1)
+            {
+                Logger.Warning($"Vipps.Login: found more than one account for subjectGuid {subjectGuid}. Fallback to use first result.");
+            }
+            return contacts.FirstOrDefault();
         }
 
         public IEnumerable<CustomerContact> FindCustomerContacts(string email, string phone)
         {
-            var byEmail = FindContactsByEmail(email);
-            var byPhone = FindContactsByPhone(phone);
+            var byEmail = _vippsLoginDataLoader.FindContactsByEmail(email);
+            var byPhone = _vippsLoginDataLoader.FindContactsByPhone(phone);
 
             // return distinct list
             return byEmail
@@ -81,7 +77,7 @@ namespace Vipps.Login.Episerver.Commerce
             {
                 // Maps fields onto customer contact
                 // Vipps email, firstname, lastname, fullname, birthdate
-                MapVippsContactFields(currentContact, vippsUserInfo);
+                _vippsLoginMapper.MapVippsContactFields(currentContact, vippsUserInfo);
             }
 
             if (options.SyncAddresses)
@@ -90,71 +86,6 @@ namespace Vipps.Login.Episerver.Commerce
             }
 
             currentContact.SaveChanges();
-        }
-
-        protected virtual IEnumerable<CustomerContact> FindContactsByEmail(string email)
-        {
-            IEnumerable<CustomerContact> byEmail;
-            try
-            {
-                byEmail = BusinessManager
-                .List(ContactEntity.ClassName, new[]
-                {
-                    new FilterElement(
-                        "Email",
-                        FilterElementType.Equal,
-                        email
-                    )
-                }, new SortingElement[0], 0, 2)
-                .OfType<CustomerContact>();
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Vipps.Login: could not load contacts by email", ex);
-                byEmail = Enumerable.Empty<CustomerContact>();
-            }
-
-            var byUserKey = CustomerContext.Current.GetContactByUserId(_mapUserKey.ToTypedString(email));
-            if (byUserKey != null)
-            {
-                return new[] { byUserKey }
-                    .Union(byEmail);
-            }
-
-                return byEmail;
-            }
-
-        protected virtual IEnumerable<CustomerContact> FindContactsByPhone(string phone)
-        {
-            try
-            {
-                return BusinessManager
-                    .List(AddressEntity.ClassName, new FilterElement[]
-                    {
-                        new OrBlockFilterElement(
-                            new FilterElement(
-                                "DaytimePhoneNumber",
-                                FilterElementType.Equal,
-                                phone
-                            ),
-                            new FilterElement(
-                                "EveningPhoneNumber",
-                                FilterElementType.Equal,
-                                phone
-                            ))
-                    }, new SortingElement[0], 0, 50)
-                    .OfType<CustomerAddress>()
-                    .Where(x => x.ContactId.HasValue)
-                    .Select(x => x.ContactId.Value)
-                    .GroupBy(x => x)
-                    .Select(x => BusinessManager.Load(ContactEntity.ClassName, x.First()))
-                    .OfType<CustomerContact>();
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("Vipps.Login: could not load contacts by phone number", ex);
-                return Enumerable.Empty<CustomerContact>();
-            }
         }
 
         protected virtual void SyncAddresses(
@@ -193,7 +124,7 @@ namespace Vipps.Login.Episerver.Commerce
 
                 // Maps fields onto customer address:
                 // Vipps address type, street, city, postalcode, countrycode
-                MapVippsAddressFields(address, vippsAddress);
+                _vippsLoginMapper.MapVippsAddressFields(address, vippsAddress);
                 address.DaytimePhoneNumber = address.EveningPhoneNumber = vippsUserInfo.PhoneNumber;
 
                 if (isNewAddress)
@@ -205,42 +136,6 @@ namespace Vipps.Login.Episerver.Commerce
                     currentContact.UpdateContactAddress(address);
                 }
             }
-        }
-
-        protected virtual void MapVippsContactFields(
-            CustomerContact contact,
-            VippsUserInfo userInfo
-        )
-        {
-            if (userInfo == null)
-            {
-                throw new ArgumentNullException(nameof(userInfo));
-            }
-
-            contact.Email = userInfo.Email;
-            contact.FirstName = userInfo.GivenName;
-            contact.LastName = userInfo.FamilyName;
-            contact.FullName = userInfo.Name;
-            contact.BirthDate = userInfo.BirthDate;
-        }
-
-        protected virtual void MapVippsAddressFields(
-            CustomerAddress address,
-            VippsAddress vippsAddress
-        )
-        {
-            if (vippsAddress == null)
-            {
-                throw new ArgumentNullException(nameof(vippsAddress));
-            }
-
-            address.Name = $"Vipps - {address.GetVippsAddressType()}";
-            address.Line1 = vippsAddress.StreetAddress;
-            address.City = vippsAddress.Region;
-            address.PostalCode = vippsAddress.PostalCode;
-            //TODO: map country code
-            address.CountryCode = vippsAddress.Country;
-            address.SetVippsAddressType(vippsAddress.AddressType);
         }
     }
 }

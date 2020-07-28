@@ -93,20 +93,13 @@ namespace Vipps.Login.Episerver.Commerce
             }
 
             var customerContact = _vippsCommerceService.Service
-                .FindCustomerContacts(subjectGuid.Value)
-                .FirstOrDefault();
-            if (customerContact == null)
-            {
-                return null;
-            }
-
-            return GetLoginEmailFromContact(customerContact);
+                .FindCustomerContact(subjectGuid.Value);
+            return customerContact == null ? null : GetLoginEmailFromContact(customerContact);
         }
 
         private string GetLoginEmailFromContact(CustomerContact customerContact)
         {
-            var something = _mapUserKey.Service.ToUserKey(customerContact.UserId);
-            return something.ToString();
+            return _mapUserKey.Service.ToUserKey(customerContact?.UserId)?.ToString();
         }
     }
 }

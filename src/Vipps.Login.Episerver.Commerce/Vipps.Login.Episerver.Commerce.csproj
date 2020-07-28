@@ -258,11 +258,15 @@
     <Compile Include="Initialization\MetadataInitialization.cs" />
     <Compile Include="Initialization\VippsLoginCommerceInitialization.cs" />
     <Compile Include="IVippsLoginCommerceService.cs" />
+    <Compile Include="IVippsLoginDataLoader.cs" />
+    <Compile Include="IVippsLoginMapper.cs" />
     <Compile Include="MetadataConstants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VippsLoginCommerceService.cs" />
     <Compile Include="VippsEpiNotifications.cs" />
+    <Compile Include="VippsLoginDataLoader.cs" />
     <Compile Include="VippsLoginDuplicateAccountException.cs" />
+    <Compile Include="VippsLoginMapper.cs" />
     <Compile Include="VippsSyncOptions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -280,5 +284,6 @@
     <None Include="packages.config" />
     <None Include="Vipps.Login.Episerver.Commerce.nuspec" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
