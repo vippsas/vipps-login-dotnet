@@ -12,12 +12,17 @@ namespace Vipps.Login.Episerver.Commerce
 {
     public class VippsLoginCommerceService : IVippsLoginCommerceService
     {
+        private static readonly EPiServer.Logging.ILogger Logger = LogManager.GetLogger(typeof(VippsLoginCommerceService));
+
         private readonly IVippsLoginService _vippsLoginService;
+        private readonly MapUserKey _mapUserKey;
 
         public VippsLoginCommerceService(
-            IVippsLoginService vippsLoginService)
+            IVippsLoginService vippsLoginService,
+            MapUserKey mapUserKey)
         {
             _vippsLoginService = vippsLoginService;
+            _mapUserKey = mapUserKey;
         }
 
         public IEnumerable<CustomerContact> FindCustomerContacts(Guid subjectGuid)
@@ -36,36 +41,8 @@ namespace Vipps.Login.Episerver.Commerce
 
         public IEnumerable<CustomerContact> FindCustomerContacts(string email, string phone)
         {
-            var byEmail = BusinessManager
-                .List(ContactEntity.ClassName, new[]
-                {
-                    new FilterElement(
-                        "Email",
-                        FilterElementType.Equal,
-                        email
-                    )
-                }, new SortingElement[0], 0, 2)
-                .OfType<CustomerContact>();
-
-            var byPhone = BusinessManager
-               .List(ContactEntity.ClassName, new[]
-               {
-                    new OrBlockFilterElement(new FilterElement(
-                        "DaytimePhoneNumber",
-                        FilterElementType.Equal,
-                        email
-                    ),
-                    new FilterElement(
-                        "EveningPhoneNumber",
-                        FilterElementType.Equal,
-                        email
-                    ))
-               }, new SortingElement[0], 0, 2)
-               .OfType<CustomerAddress>()
-               .Select(x => x.ContactId)
-               .Where(x => x.HasValue)
-               .Select(x => BusinessManager.Load(ContactEntity.ClassName, x.Value))
-               .OfType<CustomerContact>();
+            var byEmail = FindContactsByEmail(email);
+            var byPhone = FindContactsByPhone(phone);
 
             // return distinct list
             return byEmail
@@ -113,6 +90,71 @@ namespace Vipps.Login.Episerver.Commerce
             }
 
             currentContact.SaveChanges();
+        }
+
+        protected virtual IEnumerable<CustomerContact> FindContactsByEmail(string email)
+        {
+            IEnumerable<CustomerContact> byEmail;
+            try
+            {
+                byEmail = BusinessManager
+                .List(ContactEntity.ClassName, new[]
+                {
+                    new FilterElement(
+                        "Email",
+                        FilterElementType.Equal,
+                        email
+                    )
+                }, new SortingElement[0], 0, 2)
+                .OfType<CustomerContact>();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Vipps.Login: could not load contacts by email", ex);
+                byEmail = Enumerable.Empty<CustomerContact>();
+            }
+
+            var byUserKey = CustomerContext.Current.GetContactByUserId(_mapUserKey.ToTypedString(email));
+            if (byUserKey != null)
+            {
+                return new[] { byUserKey }
+                    .Union(byEmail);
+            }
+
+                return byEmail;
+            }
+
+        protected virtual IEnumerable<CustomerContact> FindContactsByPhone(string phone)
+        {
+            try
+            {
+                return BusinessManager
+                    .List(AddressEntity.ClassName, new FilterElement[]
+                    {
+                        new OrBlockFilterElement(
+                            new FilterElement(
+                                "DaytimePhoneNumber",
+                                FilterElementType.Equal,
+                                phone
+                            ),
+                            new FilterElement(
+                                "EveningPhoneNumber",
+                                FilterElementType.Equal,
+                                phone
+                            ))
+                    }, new SortingElement[0], 0, 50)
+                    .OfType<CustomerAddress>()
+                    .Where(x => x.ContactId.HasValue)
+                    .Select(x => x.ContactId.Value)
+                    .GroupBy(x => x)
+                    .Select(x => BusinessManager.Load(ContactEntity.ClassName, x.First()))
+                    .OfType<CustomerContact>();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Vipps.Login: could not load contacts by phone number", ex);
+                return Enumerable.Empty<CustomerContact>();
+            }
         }
 
         protected virtual void SyncAddresses(
