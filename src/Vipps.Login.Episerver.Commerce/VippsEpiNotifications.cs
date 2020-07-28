@@ -20,30 +20,34 @@ namespace Vipps.Login.Episerver.Commerce
         private static readonly ILogger Logger = LogManager.GetLogger(typeof(VippsEpiNotifications));
 
 #pragma warning disable 649
-        private Injected<ISynchronizingUserService> _synchronizingUserServiceAccessor;
-        private Injected<IVippsLoginService> _vippsLoginServiceAccessor;
-        private Injected<IVippsLoginCommerceService> _vippsCommerceServiceAccessor;
-        private Injected<MapUserKey> _mapUserKeyAccessor;
+        private Injected<ISynchronizingUserService> _synchronizingUserServiceInjected;
+        private Injected<IVippsLoginService> _vippsLoginServiceInjected;
+        private Injected<IVippsLoginCommerceService> _vippsCommerceServiceInjected;
+        private Injected<IVippsLoginSanityCheck> _vippsLoginSanityCheckInjected;
+        private Injected<MapUserKey> _mapUserKeyInjected;
 #pragma warning restore 649
 
         private readonly ISynchronizingUserService _synchronizingUserService;
         private readonly IVippsLoginService _vippsLoginService;
         private readonly IVippsLoginCommerceService _vippsCommerceService;
+        private readonly IVippsLoginSanityCheck _vippsLoginSanityCheck;
         private readonly MapUserKey _mapUserKey;
 
         public VippsEpiNotifications()
         {
             SecurityTokenValidated = DefaultSecurityTokenValidated;
-            _synchronizingUserService = _synchronizingUserServiceAccessor.Service;
-            _vippsLoginService = _vippsLoginServiceAccessor.Service;
-            _vippsCommerceService = _vippsCommerceServiceAccessor.Service;
-            _mapUserKey = _mapUserKeyAccessor.Service;
+            _synchronizingUserService = _synchronizingUserServiceInjected.Service;
+            _vippsLoginService = _vippsLoginServiceInjected.Service;
+            _vippsCommerceService = _vippsCommerceServiceInjected.Service;
+            _vippsLoginSanityCheck = _vippsLoginSanityCheckInjected.Service;
+            _mapUserKey = _mapUserKeyInjected.Service;
         }
 
         public VippsEpiNotifications(
             ISynchronizingUserService synchronizingUserService,
             IVippsLoginService vippsLoginService,
             IVippsLoginCommerceService vippsLoginCommerceService,
+            IVippsLoginSanityCheck vippsLoginSanityCheck,
             MapUserKey mapUserKey
                 )
         {
@@ -51,6 +55,7 @@ namespace Vipps.Login.Episerver.Commerce
             _synchronizingUserService = synchronizingUserService;
             _vippsLoginService = vippsLoginService;
             _vippsCommerceService = vippsLoginCommerceService;
+            _vippsLoginSanityCheck = vippsLoginSanityCheck;
             _mapUserKey = mapUserKey;
         }
 
@@ -83,8 +88,14 @@ namespace Vipps.Login.Episerver.Commerce
                 var contacts = FindByVippsInfo(vippsInfo).ToArray();
                 if (contacts.Length == 1)
                 {
-                    // TODO: implement 'Sanity check'
-                    emailAddress = GetLoginEmailFromContact(contacts.First());
+                    var contact = contacts.First();
+                    if (!_vippsLoginSanityCheck.IsValidContact(contact, vippsInfo))
+                    {
+                        var message = "Existing contact does not pass verification.";
+                        Logger.Warning($"Vipps.Login: {message}. Subject Guid: {vippsInfo.Sub}");
+                        throw new VippsLoginSanityCheckException(message);
+                    }
+                    emailAddress = GetLoginEmailFromContact(contact);
                 }
                 else if (contacts.Length > 1)
                 {

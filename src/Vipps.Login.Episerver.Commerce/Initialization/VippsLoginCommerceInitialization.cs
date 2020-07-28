@@ -20,6 +20,7 @@ namespace Vipps.Login.Episerver.Commerce.Initialization
             context.Services.AddTransient<IVippsLoginCommerceService, VippsLoginCommerceService>();
             context.Services.AddTransient<IVippsLoginMapper, VippsLoginMapper>();
             context.Services.AddTransient<IVippsLoginDataLoader, VippsLoginDataLoader>();
+            context.Services.AddTransient<IVippsLoginSanityCheck, VippsLoginSanityCheck>();
         }
     }
 }

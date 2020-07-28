@@ -27,6 +27,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 A.Fake<ISynchronizingUserService>(),
                 vippsLoginService,
                 A.Fake<IVippsLoginCommerceService>(),
+                A.Fake<IVippsLoginSanityCheck>(),
                 A.Fake<MapUserKey>()
             );
             
@@ -41,6 +42,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 A.Fake<ISynchronizingUserService>(),
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginCommerceService>(),
+                A.Fake<IVippsLoginSanityCheck>(),
                 A.Fake<MapUserKey>()
             );
 
@@ -76,6 +78,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 A.Fake<ISynchronizingUserService>(),
                 vippsLoginService,
                 vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
                 GetMapUserKey(testEmail)
             );
 
@@ -103,6 +106,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 A.Fake<ISynchronizingUserService>(),
                 A.Fake<IVippsLoginService>(),
                 vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
                 GetMapUserKey(testEmail)
             );
 
@@ -142,10 +146,15 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             A.CallTo(() => vippsCommerceService.FindCustomerContacts(testEmail, testPhoneNumber))
                 .Returns(new [] { new CustomerContact { UserId = testEmail } });
 
+            var sanityCheck = A.Fake<IVippsLoginSanityCheck>();
+            A.CallTo(() => sanityCheck.IsValidContact(A<CustomerContact>._, A<VippsUserInfo>._))
+                .Returns(true);
+
             var notifications = new VippsEpiNotifications(
                 A.Fake<ISynchronizingUserService>(),
                 vippsLoginService,
                 vippsCommerceService,
+                sanityCheck,
                 GetMapUserKey(testEmail)
             );
 
@@ -157,6 +166,52 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                     context.AuthenticationTicket.Identity.NameClaimType,
                     testEmail)
             );
+        }
+
+        // Existing user
+        // No contact with subject guid
+        // Find with phone or by email
+        // Fail sanity check
+        [Fact]
+        public async Task DefaultSecurityTokenValidatedThrowsIfSanityCheckFails()
+        {
+            var testEmail = "test@test.com";
+            var testPhoneNumber = "0612345678";
+
+            var vippsLoginService = A.Fake<IVippsLoginService>();
+            A.CallTo(() => vippsLoginService.GetVippsUserInfo(A<ClaimsIdentity>._))
+                .Returns(new VippsUserInfo
+                {
+                    Email = testEmail,
+                    PhoneNumber = testPhoneNumber
+                });
+
+            // No contact with subject guid
+            var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
+            A.CallTo(() => vippsCommerceService.FindCustomerContact(A<Guid>._))
+                .Returns(null);
+
+            // Find with phone or by email
+            A.CallTo(() => vippsCommerceService.FindCustomerContacts(testEmail, testPhoneNumber))
+                .Returns(new[] { new CustomerContact { UserId = testEmail } });
+
+            // Failing sanity check
+            var sanityCheck = A.Fake<IVippsLoginSanityCheck>();
+            A.CallTo(() => sanityCheck.IsValidContact(A<CustomerContact>._, A<VippsUserInfo>._))
+                .Returns(false);
+
+            var notifications = new VippsEpiNotifications(
+                A.Fake<ISynchronizingUserService>(),
+                vippsLoginService,
+                vippsCommerceService,
+                sanityCheck,
+                GetMapUserKey(testEmail)
+            );
+
+            var context = CreateContext();
+
+            await Assert.ThrowsAsync<VippsLoginSanityCheckException>(async () =>
+                await notifications.DefaultSecurityTokenValidated(context));
         }
 
         // Existing users
@@ -189,6 +244,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 A.Fake<ISynchronizingUserService>(),
                 vippsLoginService,
                 vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
                 GetMapUserKey(testEmail)
             );
 

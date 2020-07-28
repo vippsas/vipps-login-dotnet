@@ -278,6 +278,7 @@
     <Compile Include="AddressExtensionsTests.cs" />
     <Compile Include="VippsEpiNotificationsTests.cs" />
     <Compile Include="VippsLoginMapperTests.cs" />
+    <Compile Include="VippsLoginSanityCheckTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
