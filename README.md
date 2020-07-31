@@ -84,8 +84,11 @@ Described in detail here: https://world.episerver.com/documentation/developer-gu
 
 #### 3. Configure Vipps OIDC during app Startup
 
-Here you can find the default configuration needed to support Vipps OIDC. The code in the `SecurityTokenValidated` notification will be executed once the user is logged in through Vipps and gave consent to our application. Here the identity will contain all Vipps User Information and it's up to you to decide what to do with it.
-The code below will let users Authenticate themselves through Vipps:
+Here you can find the default configuration needed to support Vipps OIDC. Some tips:
+
+1. Be sure to configure only the scopes you actually need.
+2. If authentication fails, we suggest redirecting to the normal login page and show an informational message.
+3. Determine what you which information from Vipps you want to sync. By default we will update the customer contact and the customer addresses upon login.
 
 ```csharp
 public class Startup
@@ -108,7 +111,7 @@ public class Startup
             VippsLoginConfig.Authority
             )
         {
-            // Here you pass in the scopes you need
+            // 1. Here you pass in the scopes you need
             Scope = string.Join(" ", new []
             {
                 VippsScopes.OpenId,
@@ -122,37 +125,29 @@ public class Startup
             // By default it will handle:
             // RedirectToIdentityProvider - Redirecting to Vipps using correct RedirectUri
             // AuthorizationCodeReceived - Exchange Authentication code for id_token and access_token
-            // DefaultAuthenticationFailed - Display error message on failed auth
-            Notifications = new VippsOpenIdConnectAuthenticationNotifications
+            // DefaultSecurityTokenValidated - Find matching CustomerContact
+
+            Notifications = new VippsEpiNotifications
             {
-                // This will be called after creating the identity and its roles but before syncing to the db.
-                // Can be used to add/delete claims or change other properties
-                SecurityTokenValidated = async ctx =>
+                AuthenticationFailed = context =>
                 {
-                    // Prevent redirecting to external Uris
-                    var redirectUri = new Uri(ctx.AuthenticationTicket.Properties.RedirectUri,
-                        UriKind.RelativeOrAbsolute);
-                    if (redirectUri.IsAbsoluteUri)
+                    _logger.Error("Vipps.Login failed", context.Exception);
+
+                    var message = "Something went wrong. Please contact customer support.";
+                    switch (context.Exception)
                     {
-                        ctx.AuthenticationTicket.Properties.RedirectUri = redirectUri.PathAndQuery;
+                        case VippsLoginDuplicateAccountException _:
+                            message = "Multiple accounts found matching this Vipps user info. Please log in and link your Vipps account through the profile page.";
+                            break;
+                        case VippsLoginSanityCheckException _:
+                            message = "Existing account found but did not pass Vipps sanity check. Please log in and link your Vipps account through the profile page.";
+                            break;
                     }
 
-                    // By default we use email address as username
-                    var identity = ctx.AuthenticationTicket.Identity;
-                    identity.AddClaim(
-                        new Claim(identity.NameClaimType, identity.FindFirst(ClaimTypes.Email)?.Value)
-                    );
-
-                    // Here you can add extra roles to the user
-                    // For example to allow CMS access:
-                    // identity.AddClaim(new Claim(ClaimTypes.Role, "WebEditors"));
-
-                    // You can also create an application user here
-                    // Or automatically sync all Vipps data
-
-                    // Sync user and the roles to Epi
-                    await ServiceLocator.Current.GetInstance<ISynchronizingUserService>()
-                        .SynchronizeAsync(identity, new List<string>());
+                    // 2. Redirect to login page and display message
+                    context.HandleResponse();
+                    context.Response.Redirect($"/user?error={message}");
+                    return (Task)Task.FromResult<int>(0);
                 }
             }
         });
@@ -164,6 +159,14 @@ public class Startup
                 ctx.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType);
                 return Task.Delay(0);
             }
+
+            // 3. Make sure to call SyncInfo. You can use the VippsSyncOptions to determine what to sync (contact/address info)
+            ServiceLocator.Current.GetInstance<IVippsLoginCommerceService>()
+                .SyncInfo(
+                    ctx.Authentication.User.Identity,
+                    CustomerContext.Current.CurrentContact,
+                    new VippsSyncOptions());
+
             // Return to this url after authenticating
             var returnUrl = ctx.Request.Query.Get("ReturnUrl") ?? "/";
 
@@ -185,7 +188,7 @@ public class Startup
 }
 ```
 
-When the user goes to the path `https://{your-site}/vipps-login`, the Vipps middleware will be triggered and it will redirect the user to the Vipps log in environment. You will have to configure this redirect URL in Vipps, as described here: https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login
+When the user goes to `https://{your-site}/vipps-login`, the Vipps middleware will be triggered and it will redirect the user to the Vipps log in environment. You will have to configure this redirect URL in Vipps, as described here: https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login
 
 You can add a ReturnUrl to redirect the user once they are logged in, for example `https://{your-site}/vipps-login?ReturnUrl=/vipps-landing`.
 
