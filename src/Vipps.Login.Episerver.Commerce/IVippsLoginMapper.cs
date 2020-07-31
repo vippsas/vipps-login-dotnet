@@ -14,5 +14,12 @@ namespace Vipps.Login.Episerver.Commerce
             CustomerAddress address,
             VippsAddress vippsAddress
         );
+
+        void MapAddress(
+            CustomerContact currentContact,
+            CustomerAddressTypeEnum addressType,
+            VippsAddress vippsAddress,
+            string phoneNumber
+        );
     }
 }

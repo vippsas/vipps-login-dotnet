@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Principal;
 using EPiServer.Logging;
 using Vipps.Login.Episerver.Commerce.Extensions;
+using Vipps.Login.Models;
 
 namespace Vipps.Login.Episerver.Commerce
 {
@@ -30,8 +31,10 @@ namespace Vipps.Login.Episerver.Commerce
             var contacts = _vippsLoginDataLoader.FindContactsBySubjectGuid(subjectGuid).ToList();
             if (contacts.Count() > 1)
             {
-                Logger.Warning($"Vipps.Login: found more than one account for subjectGuid {subjectGuid}. Fallback to use first result.");
+                Logger.Warning(
+                    $"Vipps.Login: found more than one account for subjectGuid {subjectGuid}. Fallback to use first result.");
             }
+
             return contacts.FirstOrDefault();
         }
 
@@ -82,59 +85,19 @@ namespace Vipps.Login.Episerver.Commerce
 
             if (options.SyncAddresses)
             {
-                SyncAddresses(identity, currentContact, options.AddressType);
-            }
-
-            currentContact.SaveChanges();
-        }
-
-        protected virtual void SyncAddresses(
-            IIdentity identity,
-            CustomerContact currentContact,
-            CustomerAddressTypeEnum addressType)
-        {
-            if (identity == null)
-            {
-                throw new ArgumentNullException(nameof(identity));
-            }
-
-            if (currentContact == null)
-            {
-                throw new ArgumentNullException(nameof(currentContact));
-            }
-
-            var vippsUserInfo = _vippsLoginService.GetVippsUserInfo(identity);
-            if (vippsUserInfo == null)
-            {
-                return;
-            }
-
-            foreach (var vippsAddress in vippsUserInfo.Addresses)
-            {
-                // Vipps addresses don't have an ID
-                // They can be identified by Vipps address type
-                var address =
-                    currentContact.ContactAddresses.FindVippsAddress(vippsAddress.AddressType);
-                var isNewAddress = address == null;
-                if (isNewAddress)
+                foreach (var vippsAddress in vippsUserInfo.Addresses)
                 {
-                    address = CustomerAddress.CreateInstance();
-                    address.AddressType = addressType;
+                    _vippsLoginMapper.MapAddress(
+                        currentContact,
+                        options.AddressType,
+                        vippsAddress,
+                        vippsUserInfo.PhoneNumber);
                 }
+            }
 
-                // Maps fields onto customer address:
-                // Vipps address type, street, city, postalcode, countrycode
-                _vippsLoginMapper.MapVippsAddressFields(address, vippsAddress);
-                address.DaytimePhoneNumber = address.EveningPhoneNumber = vippsUserInfo.PhoneNumber;
-
-                if (isNewAddress)
-                {
-                    currentContact.AddContactAddress(address);
-                }
-                else
-                {
-                    currentContact.UpdateContactAddress(address);
-                }
+            if (options.ShouldSaveContact)
+            {
+                currentContact.SaveChanges();
             }
         }
     }

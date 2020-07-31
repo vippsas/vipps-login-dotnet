@@ -7,7 +7,6 @@ namespace Vipps.Login.Episerver.Commerce
 {
     public class VippsLoginMapper : IVippsLoginMapper
     {
-
         public virtual void MapVippsContactFields(
             CustomerContact contact,
             VippsUserInfo userInfo
@@ -17,10 +16,22 @@ namespace Vipps.Login.Episerver.Commerce
             if (userInfo == null) throw new ArgumentNullException(nameof(userInfo));
 
             contact.Email = userInfo.Email;
-            contact.FirstName = userInfo.GivenName;
-            contact.LastName = userInfo.FamilyName;
-            contact.FullName = userInfo.Name;
-            contact.BirthDate = userInfo.BirthDate;
+            if (!string.IsNullOrWhiteSpace(userInfo.GivenName))
+            {
+                contact.FirstName = userInfo.GivenName;
+            }
+            if (!string.IsNullOrWhiteSpace(userInfo.FamilyName))
+            {
+                contact.LastName = userInfo.FamilyName;
+            }
+            if (!string.IsNullOrWhiteSpace(userInfo.Name))
+            {
+                contact.FullName = userInfo.Name;
+            }
+            if (userInfo.BirthDate.HasValue)
+            {
+                contact.BirthDate = userInfo.BirthDate;
+            }
         }
 
         public virtual void MapVippsAddressFields(
@@ -38,6 +49,43 @@ namespace Vipps.Login.Episerver.Commerce
             //TODO: map country code
             address.CountryCode = vippsAddress.Country;
             address.SetVippsAddressType(vippsAddress.AddressType);
+        }
+
+        public virtual void MapAddress(
+            CustomerContact currentContact,
+            CustomerAddressTypeEnum addressType,
+            VippsAddress vippsAddress,
+            string phoneNumber)
+        {
+            if (currentContact == null) throw new ArgumentNullException(nameof(currentContact));
+            if (vippsAddress == null) throw new ArgumentNullException(nameof(vippsAddress));
+            // Vipps addresses don't have an ID
+            // They can be identified by Vipps address type
+            var address =
+                currentContact.ContactAddresses.FindVippsAddress(vippsAddress.AddressType);
+            var isNewAddress = address == null;
+            if (isNewAddress)
+            {
+                address = CustomerAddress.CreateInstance();
+                address.AddressType = addressType;
+            }
+
+            // Maps fields onto customer address:
+            // Vipps address type, street, city, postalcode, countrycode
+            MapVippsAddressFields(address, vippsAddress);
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                address.DaytimePhoneNumber = address.EveningPhoneNumber = phoneNumber;
+            }
+
+            if (isNewAddress)
+            {
+                currentContact.AddContactAddress(address);
+            }
+            else
+            {
+                currentContact.UpdateContactAddress(address);
+            }
         }
     }
 }
