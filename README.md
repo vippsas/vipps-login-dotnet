@@ -194,6 +194,21 @@ You can add a ReturnUrl to redirect the user once they are logged in, for exampl
 
 Vipps is using the OpenIdConnect Authorization Code Grant flow, this means the user is redirected back to your environment with a Authorization token. The middleware will validate the token and exchange it for an `id_token` and an `access_token`. A `ClaimsIdentity` will be created which will contain the information of the scopes that you configured (email, name, addresses etc).
 
+### Customized 'sanity check' during login
+
+If the user tries to log in with Vipps and there is an existing account that matches the Vipps information (email or phone number), the library will execute a 'sanity check'. This is done to make sure that the account is not an old account where the user has abandoned the phone number or e-mail address an this has been picked up by someone else at a later time.
+By default it will compare the first name and the last name, however it is easy to change this behaviour by implementing a custom sanity check and registering it in the DI container:
+
+```csharp
+public class VippsLoginSanityCheck : IVippsLoginSanityCheck
+{
+    public bool IsValidContact(CustomerContact contact, VippsUserInfo userInfo)
+    {
+        // your logic here
+    }
+}
+```
+
 ### Accessing Vipps user data
 
 The Vipps UserInfo can be accessed by calling `IVippsLoginService.GetVippsUserInfo(IIdentity identity)`, this will give you the user info that was retrieved when the user logged in (cached).
