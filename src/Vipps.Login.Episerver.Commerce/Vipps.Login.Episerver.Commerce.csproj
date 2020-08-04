@@ -253,6 +253,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\VippsLoginLinkAccountException.cs" />
     <Compile Include="Exceptions\VippsLoginSanityCheckException.cs" />
     <Compile Include="Exceptions\VippsLoginException.cs" />
     <Compile Include="Extensions\AddressExtensions.cs" />
