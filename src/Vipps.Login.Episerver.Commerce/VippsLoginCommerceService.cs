@@ -83,7 +83,7 @@ namespace Vipps.Login.Episerver.Commerce
                 _vippsLoginMapper.MapVippsContactFields(currentContact, vippsUserInfo);
             }
 
-            if (options.SyncAddresses)
+            if (options.SyncAddresses && vippsUserInfo.Addresses != null)
             {
                 foreach (var vippsAddress in vippsUserInfo.Addresses)
                 {
