@@ -4,7 +4,7 @@ using System.Linq;
 using Mediachase.Commerce.Customers;
 using Vipps.Login.Models;
 
-namespace Vipps.Login.Episerver.Commerce
+namespace Vipps.Login.Episerver.Commerce.Extensions
 {
     public static class AddressExtensions
     {
@@ -39,19 +39,6 @@ namespace Vipps.Login.Episerver.Commerce
                 return enumValue;
             }
             return null;
-        }
-
-        public static void MapVippsAddress(
-            this CustomerAddress address,
-            VippsAddress vippsAddress
-        )
-        {
-            if (vippsAddress == null) throw new ArgumentNullException(nameof(vippsAddress));
-            address.Line1 = vippsAddress.StreetAddress;
-            address.City = vippsAddress.Region;
-            address.PostalCode = vippsAddress.PostalCode;
-            address.CountryCode = vippsAddress.Country;
-            address.SetVippsAddressType(vippsAddress.AddressType);
         }
     }
 }

@@ -5,7 +5,7 @@ using EPiServer.ServiceLocation;
 namespace Vipps.Login.Episerver
 {
     [InitializableModule]
-    public class VippsLoginInitialization : IConfigurableModule
+    public class VippsLoginEpiserverInitialization : IConfigurableModule
     {
         public void Initialize(InitializationEngine context)
         {

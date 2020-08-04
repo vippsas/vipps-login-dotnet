@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -24,7 +26,6 @@ namespace Vipps.Login
             AuthorizationCodeReceived = DefaultAuthorizationCodeReceived;
             AuthenticationFailed = DefaultAuthenticationFailed;
         }
-
         protected virtual Task DefaultRedirectToIdentityProvider(RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
         {
             // In order to support multi site we change the return uri based on the current request
