@@ -227,6 +227,10 @@ You can add a ReturnUrl to redirect the user once they are logged in, for exampl
 
 Vipps is using the OpenIdConnect Authorization Code Grant flow, this means the user is redirected back to your environment with a Authorization token. The middleware will validate the token and exchange it for an `id_token` and an `access_token`. A `ClaimsIdentity` will be created which will contain the information of the scopes that you configured (email, name, addresses etc).
 
+### Link Vipps to an existing account
+
+If you want to allow **logged in users** to link to Vipps to their existing non Vipps account, you can add a link the redirect them to `https://{your-site}/vipps-login?LinkAccount=true`. When they visit that link, they will be redirected to Vipps and can go through the log in process. Once they're redirected back to your site, their Vipps account will be linked to their existing account. This means that they will now be able to use Vipps to access their existing account and they can sync their data from Vipps to Episerver.
+
 ### Customized 'sanity check' during login
 
 If the user tries to log in with Vipps and there is an existing account that matches the Vipps information (email or phone number), the library will execute a 'sanity check'. This is done to make sure that the account is not an old account where the user has abandoned the phone number or e-mail address an this has been picked up by someone else at a later time.
