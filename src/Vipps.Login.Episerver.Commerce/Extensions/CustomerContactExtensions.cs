@@ -15,6 +15,14 @@ namespace Vipps.Login.Episerver.Commerce.Extensions
             return contact[MetadataConstants.VippsSubjectGuidFieldName] as Guid?;
         }
 
-        
+        public static void SetVippsLinkAccountToken(this CustomerContact contact, Guid? subjectGuid)
+        {
+            contact[MetadataConstants.VippsSubjectGuidFieldName] = subjectGuid;
+        }
+
+        public static Guid? GetVippsLinkAccountToken(this CustomerContact contact)
+        {
+            return contact[MetadataConstants.VippsSubjectGuidFieldName] as Guid?;
+        }
     }
 }
