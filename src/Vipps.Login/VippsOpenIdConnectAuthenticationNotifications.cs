@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -32,15 +30,7 @@ namespace Vipps.Login
             // For example https://your-first-site/vipps-login or https://your-second-site/vipps-login 
             context.ProtocolMessage.RedirectUri = GetMultiSiteRedirectUri(context.ProtocolMessage.RedirectUri, context.Request);
 
-            // To avoid a redirect loop to the federation server send 403
-            // when user is authenticated but does not have access
-            if (context.OwinContext.Response.StatusCode == 401 &&
-                context.OwinContext.Authentication.User?.Identity != null &&
-                context.OwinContext.Authentication.User.Identity.IsAuthenticated)
-            {
-                context.OwinContext.Response.StatusCode = 403;
-                context.HandleResponse();
-            }
+            AvoidRedirectLoop(context);
 
             // XHR requests cannot handle redirects to a login screen, return 401
             if (context.OwinContext.Response.StatusCode == 401 &&
@@ -105,6 +95,19 @@ namespace Vipps.Login
             context.HandleResponse();
             context.Response.Write(context.Exception.Message);
             return Task.FromResult(0);
+        }
+
+        protected virtual void AvoidRedirectLoop(RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+        {
+            // To avoid a redirect loop to the federation server send 403
+            // when user is authenticated but does not have access
+            if (context.OwinContext.Response.StatusCode == 401 &&
+                context.OwinContext.Authentication.User?.Identity != null &&
+                context.OwinContext.Authentication.User.Identity.IsAuthenticated)
+            {
+                context.OwinContext.Response.StatusCode = 403;
+                context.HandleResponse();
+            }
         }
 
         protected virtual string GetMultiSiteRedirectUri(string currentRedirectUri, IOwinRequest request)

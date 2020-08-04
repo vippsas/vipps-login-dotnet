@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using EPiServer.Logging;
@@ -49,7 +50,7 @@ namespace Vipps.Login.Episerver.Commerce
             IVippsLoginCommerceService vippsLoginCommerceService,
             IVippsLoginSanityCheck vippsLoginSanityCheck,
             MapUserKey mapUserKey
-                )
+        ) : base()
         {
             SecurityTokenValidated = DefaultSecurityTokenValidated;
             _synchronizingUserService = synchronizingUserService;
@@ -57,6 +58,38 @@ namespace Vipps.Login.Episerver.Commerce
             _vippsCommerceService = vippsLoginCommerceService;
             _vippsLoginSanityCheck = vippsLoginSanityCheck;
             _mapUserKey = mapUserKey;
+        }
+
+        public VippsEpiNotifications(
+            HttpClient httpClient,
+            ISynchronizingUserService synchronizingUserService,
+            IVippsLoginService vippsLoginService,
+            IVippsLoginCommerceService vippsLoginCommerceService,
+            IVippsLoginSanityCheck vippsLoginSanityCheck,
+            MapUserKey mapUserKey
+        ) : base(httpClient)
+        {
+            SecurityTokenValidated = DefaultSecurityTokenValidated;
+            _synchronizingUserService = synchronizingUserService;
+            _vippsLoginService = vippsLoginService;
+            _vippsCommerceService = vippsLoginCommerceService;
+            _vippsLoginSanityCheck = vippsLoginSanityCheck;
+            _mapUserKey = mapUserKey;
+        }
+
+        protected override void AvoidRedirectLoop(
+            RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+        {
+            var properties = context.OwinContext.Authentication.AuthenticationResponseChallenge.Properties.Dictionary;
+            
+            // Allow LinkAccount request to pass through
+            if (properties.ContainsKey(VippsConstants.LinkAccount) &&
+                !_vippsLoginService.IsVippsIdentity(context.OwinContext.Authentication.User?.Identity))
+            {
+                return;
+            }
+
+            base.AvoidRedirectLoop(context);
         }
 
         public async Task DefaultSecurityTokenValidated(
