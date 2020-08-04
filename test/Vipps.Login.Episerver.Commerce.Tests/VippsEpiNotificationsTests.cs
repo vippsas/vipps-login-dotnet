@@ -95,6 +95,64 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             );
         }
 
+        // Linked Account user
+        // Find contact with matching subject guid
+        [Fact]
+        public async Task DefaultSecurityTokenValidatedSetsLinkedAccountEmailAsNameClaim()
+        {
+            var linkAccountGuid = Guid.NewGuid();
+            var testEmail = "test@test.com";
+            var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
+            A.CallTo(() => vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountGuid))
+                .Returns(new CustomerContact() {UserId = testEmail});
+
+            var notifications = new VippsEpiNotifications(
+                A.Fake<ISynchronizingUserService>(),
+                A.Fake<IVippsLoginService>(),
+                vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
+                GetMapUserKey(testEmail)
+            );
+
+            var context = CreateContext();
+            context.AuthenticationTicket.Properties.Dictionary.Add(VippsConstants.LinkAccount,
+                linkAccountGuid.ToString());
+
+            await notifications.DefaultSecurityTokenValidated(context);
+            Assert.True(
+                context.AuthenticationTicket.Identity.HasClaim(
+                    context.AuthenticationTicket.Identity.NameClaimType,
+                    testEmail)
+            );
+        }
+
+        // Linked Account user
+        // Throws if no linked account user found
+        [Fact]
+        public async Task DefaultSecurityTokenThrowsIfNoLinkedAccountFound()
+        {
+            var linkAccountGuid = Guid.NewGuid();
+            var testEmail = "test@test.com";
+            var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
+            A.CallTo(() => vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountGuid))
+                .Returns(null);
+
+            var notifications = new VippsEpiNotifications(
+                A.Fake<ISynchronizingUserService>(),
+                A.Fake<IVippsLoginService>(),
+                vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
+                GetMapUserKey(testEmail)
+            );
+
+            var context = CreateContext();
+            context.AuthenticationTicket.Properties.Dictionary.Add(VippsConstants.LinkAccount,
+                linkAccountGuid.ToString());
+
+            await Assert.ThrowsAsync<VippsLoginLinkAccountException>(async () =>
+                await notifications.DefaultSecurityTokenValidated(context));
+        }
+
         // Existing user
         // Find contact with matching subject guid
         [Fact]
@@ -331,7 +389,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var properties = new AuthenticationProperties();
             properties.Dictionary.Add(VippsConstants.LinkAccount, VippsConstants.LinkAccount);
             A.CallTo(() => context.Authentication.AuthenticationResponseChallenge)
-                .Returns(new AuthenticationResponseChallenge(new[] { "" }, properties));
+                .Returns(new AuthenticationResponseChallenge(new[] {""}, properties));
 
             var notification =
                 new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(
