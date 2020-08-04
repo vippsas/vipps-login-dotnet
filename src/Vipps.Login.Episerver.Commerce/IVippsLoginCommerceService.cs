@@ -10,5 +10,7 @@ namespace Vipps.Login.Episerver.Commerce
         CustomerContact FindCustomerContact(Guid subjectGuid);
         IEnumerable<CustomerContact> FindCustomerContacts(string email, string phone);
         void SyncInfo(IIdentity identity, CustomerContact currentContact, VippsSyncOptions options = default);
+        Guid CreateLinkAccountToken(CustomerContact contact);
+        CustomerContact FindCustomerContactByLinkAccountToken(Guid linkAccountToken);
     }
 }

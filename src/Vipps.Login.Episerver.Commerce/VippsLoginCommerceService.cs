@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Principal;
 using EPiServer.Logging;
 using Vipps.Login.Episerver.Commerce.Extensions;
-using Vipps.Login.Models;
 
 namespace Vipps.Login.Episerver.Commerce
 {
@@ -25,7 +24,7 @@ namespace Vipps.Login.Episerver.Commerce
             _vippsLoginMapper = vippsLoginMapper;
             _vippsLoginDataLoader = vippsLoginDataLoader;
         }
-
+        
         public CustomerContact FindCustomerContact(Guid subjectGuid)
         {
             var contacts = _vippsLoginDataLoader.FindContactsBySubjectGuid(subjectGuid).ToList();
@@ -99,6 +98,26 @@ namespace Vipps.Login.Episerver.Commerce
             {
                 currentContact.SaveChanges();
             }
+        }
+
+        public CustomerContact FindCustomerContactByLinkAccountToken(Guid linkAccountToken)
+        {
+            var contacts = _vippsLoginDataLoader.FindContactsByLinkAccountToken(linkAccountToken).ToList();
+            if (contacts.Count() > 1)
+            {
+                Logger.Warning(
+                    $"Vipps.Login: found more than one account for subjectGuid {linkAccountToken}. Fallback to use first result.");
+            }
+
+            return contacts.FirstOrDefault();
+        }
+
+        public Guid CreateLinkAccountToken(CustomerContact contact)
+        {
+            var token = Guid.NewGuid();
+            contact.SetVippsLinkAccountToken(token);
+            contact.SaveChanges();
+            return token;
         }
     }
 }

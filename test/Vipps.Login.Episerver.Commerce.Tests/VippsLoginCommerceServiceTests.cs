@@ -79,6 +79,69 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             Assert.NotEqual(expectedContact, contact);
         }
 
+        [Fact]
+        public void FindCustomerContactByLinkAccountTokenShouldBeNull()
+        {
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>());
+
+            var contact = service.FindCustomerContactByLinkAccountToken(Guid.Empty);
+            Assert.Null(contact);
+        }
+
+        [Fact]
+        public void FindCustomerContactByLinkAccountTokenShouldReturnContact()
+        {
+            var expectedContact = new CustomerContact();
+            var dataLoader = A.Fake<IVippsLoginDataLoader>();
+            A.CallTo(() => dataLoader.FindContactsByLinkAccountToken(A<Guid>._))
+                .Returns(new[] { expectedContact });
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                dataLoader
+            );
+
+            var contact = service.FindCustomerContactByLinkAccountToken(Guid.Empty);
+            Assert.Equal(expectedContact, contact);
+        }
+
+        [Fact]
+        public void FindCustomerContactByLinkAccountTokenShouldReturnFirstContact()
+        {
+            var expectedContact = new CustomerContact();
+            var dataLoader = A.Fake<IVippsLoginDataLoader>();
+            A.CallTo(() => dataLoader.FindContactsByLinkAccountToken(A<Guid>._))
+                .Returns(new[] { expectedContact, new CustomerContact() });
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                dataLoader
+            );
+
+            var contact = service.FindCustomerContactByLinkAccountToken(Guid.Empty);
+            Assert.Equal(expectedContact, contact);
+        }
+
+        [Fact]
+        public void FindCustomerContactByLinkAccountTokenShouldReturnNotEqualLastContact()
+        {
+            var expectedContact = new CustomerContact();
+            var dataLoader = A.Fake<IVippsLoginDataLoader>();
+            A.CallTo(() => dataLoader.FindContactsByLinkAccountToken(A<Guid>._))
+                .Returns(new[] { new CustomerContact(), expectedContact });
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                dataLoader
+            );
+
+            var contact = service.FindCustomerContactByLinkAccountToken(Guid.Empty);
+            Assert.NotEqual(expectedContact, contact);
+        }
+
 
         [Fact]
         public void FindCustomerContactsShouldBeEmpty()
