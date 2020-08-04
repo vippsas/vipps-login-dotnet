@@ -28,7 +28,7 @@ namespace Vipps.Login.Episerver.Commerce
             {
                 contact.FullName = userInfo.Name;
             }
-            if (userInfo.BirthDate.HasValue)
+            if (userInfo.BirthDate.HasValue && userInfo.BirthDate.Value > DateTime.MinValue)
             {
                 contact.BirthDate = userInfo.BirthDate;
             }
