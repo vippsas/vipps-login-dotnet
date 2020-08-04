@@ -101,7 +101,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             Assert.Equal(vippsAddressType, customerAddress.GetVippsAddressType());
             Assert.Equal(vippsStreetAddress, customerAddress.Line1);
             Assert.Equal(region, customerAddress.City);
-            Assert.Equal(country, customerAddress.CountryCode);
+            Assert.Equal("NOR", customerAddress.CountryCode);
             Assert.Equal(postalCode, customerAddress.PostalCode);
         }
     }
