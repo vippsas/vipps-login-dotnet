@@ -154,21 +154,54 @@ public class Startup
         // Trigger Vipps middleware on this path to start authentication
         app.Map("/vipps-login", map => map.Run(ctx =>
         {
-            if (ctx.Authentication.User?.Identity == null || !ctx.Authentication.User.Identity.IsAuthenticated)
+            var isAuthenticated = ctx.Authentication.User?.Identity?.IsAuthenticated ?? false;
+            if (!isAuthenticated)
             {
+                // Regular log in
                 ctx.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType);
                 return Task.Delay(0);
             }
 
-            // 3. Make sure to call SyncInfo. You can use the VippsSyncOptions to determine what to sync (contact/address info)
+            bool.TryParse(ctx.Request.Query.Get("LinkAccount") ?? "false", out var linkAccount);
+            var isVippsIdentity = ServiceLocator.Current.GetInstance<IVippsLoginService>()
+                .IsVippsIdentity(ctx.Authentication.User.Identity);
+            if (linkAccount && !isVippsIdentity)
+            {
+                // Link Vipps account to current logged in user account
+                ctx.Authentication.Challenge(
+                    new AuthenticationProperties(new Dictionary<string, string>
+                    {
+                        {
+                            VippsConstants.LinkAccount, ServiceLocator.Current
+                                .GetInstance<IVippsLoginCommerceService>()
+                                .CreateLinkAccountToken(CustomerContext.Current.CurrentContact)
+                                .ToString()
+                        }
+                    }), VippsAuthenticationDefaults.AuthenticationType);
+                return Task.Delay(0);
+            }
+
+            // 3. Make sure to sync vipps info (at least to sync the identifier)
+            // You can use the VippsSyncOptions to determine what else to sync (contact/address info)
             ServiceLocator.Current.GetInstance<IVippsLoginCommerceService>()
                 .SyncInfo(
                     ctx.Authentication.User.Identity,
                     CustomerContext.Current.CurrentContact,
-                    new VippsSyncOptions());
+                    new VippsSyncOptions
+                    {
+                        SyncContactInfo = false,
+                        SyncAddresses = false
+                    });
 
             // Return to this url after authenticating
             var returnUrl = ctx.Request.Query.Get("ReturnUrl") ?? "/";
+
+            // Prevent redirecting to external Uris
+            var redirectUri = new Uri(returnUrl, UriKind.RelativeOrAbsolute);
+            if (redirectUri.IsAbsoluteUri)
+            {
+                returnUrl = redirectUri.PathAndQuery;
+            }
 
             return Task.Run(() => ctx.Response.Redirect(returnUrl));
         }));
