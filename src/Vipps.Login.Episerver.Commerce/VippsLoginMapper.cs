@@ -46,8 +46,7 @@ namespace Vipps.Login.Episerver.Commerce
             address.Line1 = vippsAddress.StreetAddress;
             address.City = vippsAddress.Region;
             address.PostalCode = vippsAddress.PostalCode;
-            //TODO: map country code
-            address.CountryCode = vippsAddress.Country;
+            address.CountryCode = ToEpiCountryCode(vippsAddress.Country);
             address.SetVippsAddressType(vippsAddress.AddressType);
         }
 
@@ -86,6 +85,18 @@ namespace Vipps.Login.Episerver.Commerce
             {
                 currentContact.UpdateContactAddress(address);
             }
+        }
+
+        protected virtual string ToEpiCountryCode(string vippsCountryCode)
+        {
+            // Map country code to epi country code (three letter)
+            // As only Norwegian addresses are supported, decided to keep it simple
+            if (vippsCountryCode.Equals("no", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return "NOR";
+            }
+
+            return vippsCountryCode;
         }
     }
 }
