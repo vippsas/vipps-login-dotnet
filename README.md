@@ -41,10 +41,13 @@ Add the ClientId and the ClientSecret to the AppSettings, as such:
 <add key="VippsLogin:ClientSecret" value="..." />
 <add key="VippsLogin:Authority" value="https://apitest.vipps.no/access-management-1.0/access" />
 ```
+
 For production use
+
 ```
 <add key="VippsLogin:Authority" value="https://api.vipps.no/access-management-1.0/access" />
 ```
+
 See https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#base-urls
 
 ### Prepare Episerver for OpenID Connect
@@ -154,56 +157,24 @@ public class Startup
         // Trigger Vipps middleware on this path to start authentication
         app.Map("/vipps-login", map => map.Run(ctx =>
         {
-            var isAuthenticated = ctx.Authentication.User?.Identity?.IsAuthenticated ?? false;
-            if (!isAuthenticated)
-            {
-                // Regular log in
-                ctx.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType);
-                return Task.Delay(0);
-            }
+            var service = ServiceLocator.Current.GetInstance<IVippsLoginCommerceService>();
 
-            bool.TryParse(ctx.Request.Query.Get("LinkAccount") ?? "false", out var linkAccount);
-            var isVippsIdentity = ServiceLocator.Current.GetInstance<IVippsLoginService>()
-                .IsVippsIdentity(ctx.Authentication.User.Identity);
-            if (linkAccount && !isVippsIdentity)
+            // Vipps log in and sync Vipps user info
+            if (service.HandleLogin(ctx, new VippsSyncOptions
             {
-                // Link Vipps account to current logged in user account
-                ctx.Authentication.Challenge(
-                    new AuthenticationProperties(new Dictionary<string, string>
-                    {
-                        {
-                            VippsConstants.LinkAccount, ServiceLocator.Current
-                                .GetInstance<IVippsLoginCommerceService>()
-                                .CreateLinkAccountToken(CustomerContext.Current.CurrentContact)
-                                .ToString()
-                        }
-                    }), VippsAuthenticationDefaults.AuthenticationType);
-                return Task.Delay(0);
-            }
+                SyncContactInfo = true,
+                SyncAddresses = true
+            })) return Task.Delay(0);
 
-            // 3. Make sure to sync vipps info (at least to sync the identifier)
-            // You can use the VippsSyncOptions to determine what else to sync (contact/address info)
-            ServiceLocator.Current.GetInstance<IVippsLoginCommerceService>()
-                .SyncInfo(
-                    ctx.Authentication.User.Identity,
-                    CustomerContext.Current.CurrentContact,
-                    new VippsSyncOptions
-                    {
-                        SyncContactInfo = false,
-                        SyncAddresses = false
-                    });
+            // Link Vipps account to current logged in user account
+            bool.TryParse(ctx.Request.Query.Get("LinkAccount"), out var linkAccount);
+            if (linkAccount && service.HandleLinkAccount(ctx)) return Task.Delay(0);
 
             // Return to this url after authenticating
             var returnUrl = ctx.Request.Query.Get("ReturnUrl") ?? "/";
+            service.HandleRedirect(ctx, returnUrl);
 
-            // Prevent redirecting to external Uris
-            var redirectUri = new Uri(returnUrl, UriKind.RelativeOrAbsolute);
-            if (redirectUri.IsAbsoluteUri)
-            {
-                returnUrl = redirectUri.PathAndQuery;
-            }
-
-            return Task.Run(() => ctx.Response.Redirect(returnUrl));
+            return Task.Delay(0);
         }));
         app.Map("/vipps-logout", map =>
         {

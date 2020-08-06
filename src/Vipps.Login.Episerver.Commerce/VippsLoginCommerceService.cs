@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
+using System.Threading.Tasks;
 using EPiServer.Logging;
+using Microsoft.Owin;
+using Microsoft.Owin.Security;
 using Vipps.Login.Episerver.Commerce.Extensions;
 
 namespace Vipps.Login.Episerver.Commerce
@@ -14,17 +17,20 @@ namespace Vipps.Login.Episerver.Commerce
         private readonly IVippsLoginService _vippsLoginService;
         private readonly IVippsLoginMapper _vippsLoginMapper;
         private readonly IVippsLoginDataLoader _vippsLoginDataLoader;
+        private readonly ICustomerContactService _customerContactService;
 
         public VippsLoginCommerceService(
             IVippsLoginService vippsLoginService,
             IVippsLoginMapper vippsLoginMapper,
-            IVippsLoginDataLoader vippsLoginDataLoader)
+            IVippsLoginDataLoader vippsLoginDataLoader,
+            ICustomerContactService customerContactService)
         {
             _vippsLoginService = vippsLoginService;
             _vippsLoginMapper = vippsLoginMapper;
             _vippsLoginDataLoader = vippsLoginDataLoader;
+            _customerContactService = customerContactService;
         }
-        
+
         public CustomerContact FindCustomerContact(Guid subjectGuid)
         {
             var contacts = _vippsLoginDataLoader.FindContactsBySubjectGuid(subjectGuid).ToList();
@@ -96,7 +102,7 @@ namespace Vipps.Login.Episerver.Commerce
 
             if (options.ShouldSaveContact)
             {
-                currentContact.SaveChanges();
+                _customerContactService.SaveChanges(currentContact);
             }
         }
 
@@ -112,11 +118,76 @@ namespace Vipps.Login.Episerver.Commerce
             return contacts.FirstOrDefault();
         }
 
+        public bool HandleLogin(
+            IOwinContext context,
+            VippsSyncOptions vippsSyncOptions = default,
+            CustomerContact customerContact = null)
+        {
+            var isAuthenticated = context.Authentication.User?.Identity?.IsAuthenticated ?? false;
+            if (!isAuthenticated)
+            {
+                // Regular log in
+                context.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType);
+                return true;
+            }
+
+            // Make sure to sync vipps info (required for at least the identifier)
+            // You can use the VippsSyncOptions to determine what else to sync (contact/address info)
+            SyncInfo(
+                context.Authentication.User.Identity,
+                customerContact ?? CustomerContext.Current.CurrentContact,
+                vippsSyncOptions);
+
+            return false;
+        }
+
+        public bool HandleLinkAccount(
+            IOwinContext context,
+            CustomerContact customerContact = null)
+        {
+            var isAuthenticated = context.Authentication.User?.Identity?.IsAuthenticated ?? false;
+            if (!isAuthenticated)
+            {
+                throw new InvalidOperationException();
+            }
+            var isVippsIdentity = _vippsLoginService
+                .IsVippsIdentity(context.Authentication.User.Identity);
+            if (isVippsIdentity)
+            {
+                return false;
+            }
+
+            // Link Vipps account to current logged in user account
+            context.Authentication.Challenge(
+                new AuthenticationProperties(new Dictionary<string, string>
+                {
+                    {
+                        VippsConstants.LinkAccount,
+                        CreateLinkAccountToken(customerContact ?? CustomerContext.Current.CurrentContact)
+                            .ToString()
+                    }
+                }), VippsAuthenticationDefaults.AuthenticationType);
+            return true;
+        }
+
+        public bool HandleRedirect(IOwinContext context, string returnUrl)
+        {
+            // Prevent redirecting to external Uris
+            var redirectUri = new Uri(returnUrl, UriKind.RelativeOrAbsolute);
+            if (redirectUri.IsAbsoluteUri)
+            {
+                returnUrl = redirectUri.PathAndQuery;
+            }
+
+            context.Response.Redirect(returnUrl);
+            return true;
+        }
+
         public Guid CreateLinkAccountToken(CustomerContact contact)
         {
             var token = Guid.NewGuid();
             contact.SetVippsLinkAccountToken(token);
-            contact.SaveChanges();
+            _customerContactService.SaveChanges(contact);
             return token;
         }
     }

@@ -17,12 +17,12 @@ namespace Vipps.Login.Episerver.Commerce.Extensions
 
         public static void SetVippsLinkAccountToken(this CustomerContact contact, Guid? subjectGuid)
         {
-            contact[MetadataConstants.VippsSubjectGuidFieldName] = subjectGuid;
+            contact[MetadataConstants.VippsLinkAccountTokenFieldName] = subjectGuid;
         }
 
         public static Guid? GetVippsLinkAccountToken(this CustomerContact contact)
         {
-            return contact[MetadataConstants.VippsSubjectGuidFieldName] as Guid?;
+            return contact[MetadataConstants.VippsLinkAccountTokenFieldName] as Guid?;
         }
     }
 }

@@ -2,13 +2,11 @@
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
-using System.Threading.Tasks;
-using EPiServer.Events.ChangeNotification.Implementation;
-using EPiServer.Security;
 using FakeItEasy;
 using Mediachase.BusinessFoundation.Data;
 using Mediachase.Commerce.Customers;
-using Vipps.Login.Episerver.Commerce.Exceptions;
+using Microsoft.Owin;
+using Microsoft.Owin.Security;
 using Vipps.Login.Models;
 using Xunit;
 
@@ -22,7 +20,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                A.Fake<IVippsLoginDataLoader>());
+                A.Fake<IVippsLoginDataLoader>(), A.Fake<ICustomerContactService>());
 
             var contact = service.FindCustomerContact(Guid.Empty);
             Assert.Null(contact);
@@ -38,7 +36,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader
+                dataLoader,
+                A.Fake<ICustomerContactService>()
             );
 
             var contact = service.FindCustomerContact(Guid.Empty);
@@ -55,7 +54,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader
+                dataLoader,
+                A.Fake<ICustomerContactService>()
             );
 
             var contact = service.FindCustomerContact(Guid.Empty);
@@ -72,7 +72,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader
+                dataLoader,
+                A.Fake<ICustomerContactService>()
             );
 
             var contact = service.FindCustomerContact(Guid.Empty);
@@ -85,7 +86,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                A.Fake<IVippsLoginDataLoader>());
+                A.Fake<IVippsLoginDataLoader>(), A.Fake<ICustomerContactService>());
 
             var contact = service.FindCustomerContactByLinkAccountToken(Guid.Empty);
             Assert.Null(contact);
@@ -97,11 +98,12 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var expectedContact = new CustomerContact();
             var dataLoader = A.Fake<IVippsLoginDataLoader>();
             A.CallTo(() => dataLoader.FindContactsByLinkAccountToken(A<Guid>._))
-                .Returns(new[] { expectedContact });
+                .Returns(new[] {expectedContact});
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader
+                dataLoader,
+                A.Fake<ICustomerContactService>()
             );
 
             var contact = service.FindCustomerContactByLinkAccountToken(Guid.Empty);
@@ -114,11 +116,12 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var expectedContact = new CustomerContact();
             var dataLoader = A.Fake<IVippsLoginDataLoader>();
             A.CallTo(() => dataLoader.FindContactsByLinkAccountToken(A<Guid>._))
-                .Returns(new[] { expectedContact, new CustomerContact() });
+                .Returns(new[] {expectedContact, new CustomerContact()});
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader
+                dataLoader,
+                A.Fake<ICustomerContactService>()
             );
 
             var contact = service.FindCustomerContactByLinkAccountToken(Guid.Empty);
@@ -131,11 +134,12 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var expectedContact = new CustomerContact();
             var dataLoader = A.Fake<IVippsLoginDataLoader>();
             A.CallTo(() => dataLoader.FindContactsByLinkAccountToken(A<Guid>._))
-                .Returns(new[] { new CustomerContact(), expectedContact });
+                .Returns(new[] {new CustomerContact(), expectedContact});
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader
+                dataLoader,
+                A.Fake<ICustomerContactService>()
             );
 
             var contact = service.FindCustomerContactByLinkAccountToken(Guid.Empty);
@@ -149,7 +153,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                A.Fake<IVippsLoginDataLoader>());
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
 
             var contact = service.FindCustomerContacts(string.Empty, string.Empty);
             Assert.Empty(contact);
@@ -170,7 +175,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader);
+                dataLoader,
+                A.Fake<ICustomerContactService>());
 
             var contacts = service.FindCustomerContacts(string.Empty, string.Empty);
 
@@ -192,7 +198,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader);
+                dataLoader,
+                A.Fake<ICustomerContactService>());
 
             var contacts = service.FindCustomerContacts(string.Empty, string.Empty);
 
@@ -216,7 +223,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                dataLoader);
+                dataLoader,
+                A.Fake<ICustomerContactService>());
 
             var contacts = service.FindCustomerContacts(string.Empty, string.Empty);
 
@@ -229,7 +237,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 A.Fake<IVippsLoginService>(),
                 A.Fake<IVippsLoginMapper>(),
-                A.Fake<IVippsLoginDataLoader>());
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
 
             Assert.Throws<ArgumentNullException>(() => service.SyncInfo(null, null));
             Assert.Throws<ArgumentNullException>(() => service.SyncInfo(new ClaimsIdentity(), null));
@@ -250,7 +259,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 loginService,
                 mapper,
-                A.Fake<IVippsLoginDataLoader>());
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
 
             service.SyncInfo(new ClaimsIdentity(), customerContact, new VippsSyncOptions
             {
@@ -260,6 +270,35 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             });
 
             A.CallTo(() => mapper.MapVippsContactFields(A<CustomerContact>._, A<VippsUserInfo>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SyncInfoShouldSaveChanges()
+        {
+            var customerContact = A.Fake<CustomerContact>();
+            var userinfo = new VippsUserInfo()
+            {
+                Addresses = Enumerable.Empty<VippsAddress>()
+            };
+            var loginService = A.Fake<IVippsLoginService>();
+            A.CallTo(() => loginService.GetVippsUserInfo(A<ClaimsIdentity>._)).Returns(userinfo);
+
+            var customerContactService = A.Fake<ICustomerContactService>();
+            var mapper = A.Fake<IVippsLoginMapper>();
+            var service = new VippsLoginCommerceService(
+                loginService,
+                mapper,
+                A.Fake<IVippsLoginDataLoader>(),
+                customerContactService);
+
+            service.SyncInfo(new ClaimsIdentity(), customerContact, new VippsSyncOptions
+            {
+                SyncContactInfo = false,
+                SyncAddresses = false,
+                ShouldSaveContact = true,
+            });
+
+            A.CallTo(() => customerContactService.SaveChanges(A<CustomerContact>._)).MustHaveHappened();
         }
 
         [Fact]
@@ -275,7 +314,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 loginService,
                 mapper,
-                A.Fake<IVippsLoginDataLoader>());
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
 
             service.SyncInfo(new ClaimsIdentity(), new CustomerContact(), new VippsSyncOptions
             {
@@ -295,7 +335,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var userInfo = new VippsUserInfo()
             {
                 Sub = Guid.NewGuid(),
-                Addresses = new[] {new VippsAddress(), new VippsAddress() }
+                Addresses = new[] {new VippsAddress(), new VippsAddress()}
             };
             var identity = new ClaimsIdentity();
             var loginService = A.Fake<IVippsLoginService>();
@@ -306,7 +346,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var service = new VippsLoginCommerceService(
                 loginService,
                 mapper,
-                A.Fake<IVippsLoginDataLoader>());
+                A.Fake<IVippsLoginDataLoader>(), A.Fake<ICustomerContactService>());
 
             service.SyncInfo(identity, contact, new VippsSyncOptions
             {
@@ -318,6 +358,160 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             A.CallTo(() => mapper.MapAddress(null, CustomerAddressTypeEnum.Billing, null, String.Empty))
                 .WithAnyArguments()
                 .MustHaveHappenedTwiceExactly();
+        }
+
+        [Fact]
+        public void HandleLoginUnauthorizedUserReturnsTrue()
+        {
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
+
+            var context = A.Fake<IOwinContext>();
+            Assert.True(service.HandleLogin(context));
+
+            A.CallTo(() => context.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType))
+                .MustHaveHappened();
+        }
+
+        [Fact]
+        public void HandleLoginAuthorizedUserReturnsFalse()
+        {
+            var context = A.Fake<IOwinContext>();
+            var user = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => context.Authentication.User).Returns(user);
+            A.CallTo(() => user.Identity.IsAuthenticated).Returns(true);
+
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
+
+            Assert.False(service.HandleLogin(
+                context,
+                new VippsSyncOptions {ShouldSaveContact = false}, customerContact:
+                new CustomerContact()));
+
+            A.CallTo(() => context.Authentication.Challenge(VippsAuthenticationDefaults.AuthenticationType))
+                .MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void HandleHandleLinkAccountThrowsForNonAuthenticatedUser()
+        {
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
+
+            Assert.Throws<InvalidOperationException>(() => service.HandleLinkAccount(A.Fake<IOwinContext>()));
+        }
+
+        [Fact]
+        public void HandleHandleLinkAccountReturnsFalseForVippsUser()
+        {
+            var context = A.Fake<IOwinContext>();
+            var user = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => context.Authentication.User).Returns(user);
+            A.CallTo(() => user.Identity.IsAuthenticated).Returns(true);
+
+            var loginService = A.Fake<IVippsLoginService>();
+            A.CallTo(() => loginService.IsVippsIdentity(A<IIdentity>._)).Returns(true);
+
+            var service = new VippsLoginCommerceService(
+                loginService,
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
+
+            Assert.False(service.HandleLinkAccount(context));
+        }
+
+        [Fact]
+        public void HandleHandleLinkAccountReturnsTrueForNonVippsUser()
+        {
+            var context = A.Fake<IOwinContext>();
+            var user = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => context.Authentication.User).Returns(user);
+            A.CallTo(() => user.Identity.IsAuthenticated).Returns(true);
+
+            var loginService = A.Fake<IVippsLoginService>();
+            A.CallTo(() => loginService.IsVippsIdentity(A<IIdentity>._)).Returns(false);
+
+            var customerContactService = A.Fake<ICustomerContactService>();
+
+            var service = new VippsLoginCommerceService(
+                loginService,
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                customerContactService);
+
+            Assert.True(service.HandleLinkAccount(context, new CustomerContact()));
+
+            A.CallTo(() =>
+                    context.Authentication.Challenge(A<AuthenticationProperties>._,
+                        VippsAuthenticationDefaults.AuthenticationType))
+                .WhenArgumentsMatch((args) =>
+                {
+                    // Verify link account token
+                    var props = args[0] as AuthenticationProperties;
+                    if (props?.Dictionary == null ||
+                        !props.Dictionary.ContainsKey(VippsConstants.LinkAccount) ||
+                        !Guid.TryParse(props.Dictionary[VippsConstants.LinkAccount], out _))
+                    {
+                        return false;
+                    }
+
+                    // Verify auth type
+                    if (!(args[1] is string[] types) ||
+                        !types.Contains(VippsAuthenticationDefaults.AuthenticationType))
+                    {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .MustHaveHappened();
+
+            // Verify storing link account token on account
+            A.CallTo(() => customerContactService.SaveChanges(A<CustomerContact>._))
+                .MustHaveHappened();
+        }
+
+        [Fact]
+        public void HandleRedirect()
+        {
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
+
+            var context = A.Fake<IOwinContext>();
+
+            Assert.True(service.HandleRedirect(context, "/redirect-url"));
+
+            A.CallTo(() => context.Response.Redirect("/redirect-url")).MustHaveHappened();
+        }
+
+        [Fact]
+        public void HandleRedirectToLocalUrlOnly()
+        {
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
+
+            var context = A.Fake<IOwinContext>();
+            
+            Assert.True(service.HandleRedirect(context, "https://test.url/redirect-url"));
+
+            A.CallTo(() => context.Response.Redirect("/redirect-url")).MustHaveHappened();
         }
     }
 }

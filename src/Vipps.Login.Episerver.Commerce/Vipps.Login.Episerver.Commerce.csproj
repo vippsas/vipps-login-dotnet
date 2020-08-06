@@ -253,11 +253,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomerContactService.cs" />
     <Compile Include="Exceptions\VippsLoginLinkAccountException.cs" />
     <Compile Include="Exceptions\VippsLoginSanityCheckException.cs" />
     <Compile Include="Exceptions\VippsLoginException.cs" />
     <Compile Include="Extensions\AddressExtensions.cs" />
     <Compile Include="Extensions\CustomerContactExtensions.cs" />
+    <Compile Include="ICustomerContactService.cs" />
     <Compile Include="Initialization\MetadataInitialization.cs" />
     <Compile Include="Initialization\VippsLoginCommerceInitialization.cs" />
     <Compile Include="IVippsLoginCommerceService.cs" />
