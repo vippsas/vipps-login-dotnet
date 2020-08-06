@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
-using System.Threading.Tasks;
 using EPiServer.Logging;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
@@ -106,6 +105,13 @@ namespace Vipps.Login.Episerver.Commerce
             }
         }
 
+        public void RemoveLinkToVippsAccount(CustomerContact contact)
+        {
+            if (contact == null) throw new ArgumentNullException(nameof(contact));
+            contact.SetVippsSubject(null);
+            _customerContactService.SaveChanges(contact);
+        }
+
         public CustomerContact FindCustomerContactByLinkAccountToken(Guid linkAccountToken)
         {
             var contacts = _vippsLoginDataLoader.FindContactsByLinkAccountToken(linkAccountToken).ToList();
@@ -150,6 +156,7 @@ namespace Vipps.Login.Episerver.Commerce
             {
                 throw new InvalidOperationException();
             }
+
             var isVippsIdentity = _vippsLoginService
                 .IsVippsIdentity(context.Authentication.User.Identity);
             if (isVippsIdentity)

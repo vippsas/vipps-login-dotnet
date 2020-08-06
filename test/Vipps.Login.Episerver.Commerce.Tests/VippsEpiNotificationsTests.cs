@@ -96,6 +96,35 @@ namespace Vipps.Login.Episerver.Commerce.Tests
         }
 
         // Linked Account user
+        // Account already linked
+        // Find contact with matching subject guid
+        [Fact]
+        public async Task DefaultSecurityTokenValidatedThrowsLinkedAccountAlreadyExists()
+        {
+            var linkAccountGuid = Guid.NewGuid();
+            var testEmail = "test@test.com";
+            var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
+            A.CallTo(() => vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountGuid))
+                .Returns(new CustomerContact() {UserId = testEmail});
+
+            var notifications = new VippsEpiNotifications(
+                A.Fake<ISynchronizingUserService>(),
+                A.Fake<IVippsLoginService>(),
+                vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
+                GetMapUserKey(testEmail)
+            );
+
+            var context = CreateContext();
+            context.AuthenticationTicket.Properties.Dictionary.Add(VippsConstants.LinkAccount,
+                linkAccountGuid.ToString());
+
+            var exception = await Assert.ThrowsAsync<VippsLoginLinkAccountException>(async () => await notifications.DefaultSecurityTokenValidated(context));
+            
+            Assert.True(exception.UserError);
+        }
+
+        // Linked Account user
         // Find contact with matching subject guid
         [Fact]
         public async Task DefaultSecurityTokenValidatedSetsLinkedAccountEmailAsNameClaim()
@@ -104,7 +133,9 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var testEmail = "test@test.com";
             var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
             A.CallTo(() => vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountGuid))
-                .Returns(new CustomerContact() {UserId = testEmail});
+                .Returns(new CustomerContact() { UserId = testEmail });
+            A.CallTo(() => vippsCommerceService.FindCustomerContact(A<Guid>._))
+                .Returns(null);
 
             var notifications = new VippsEpiNotifications(
                 A.Fake<ISynchronizingUserService>(),
@@ -136,6 +167,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
             A.CallTo(() => vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountGuid))
                 .Returns(null);
+            A.CallTo(() => vippsCommerceService.FindCustomerContact(A<Guid>._))
+                .Returns(null);
 
             var notifications = new VippsEpiNotifications(
                 A.Fake<ISynchronizingUserService>(),
@@ -149,8 +182,9 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             context.AuthenticationTicket.Properties.Dictionary.Add(VippsConstants.LinkAccount,
                 linkAccountGuid.ToString());
 
-            await Assert.ThrowsAsync<VippsLoginLinkAccountException>(async () =>
+            var exception = await Assert.ThrowsAsync<VippsLoginLinkAccountException>(async () =>
                 await notifications.DefaultSecurityTokenValidated(context));
+            Assert.False(exception.UserError);
         }
 
         // Existing user

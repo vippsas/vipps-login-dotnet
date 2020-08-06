@@ -159,7 +159,7 @@ public class Startup
         {
             var service = ServiceLocator.Current.GetInstance<IVippsLoginCommerceService>();
 
-            // Vipps log in and sync Vipps user info
+            // 3. Vipps log in and sync Vipps user info
             if (service.HandleLogin(ctx, new VippsSyncOptions
             {
                 SyncContactInfo = true,
@@ -217,84 +217,45 @@ public class VippsLoginSanityCheck : IVippsLoginSanityCheck
 }
 ```
 
+### Linking a Vipps account to multiple webshop accounts
+
+It is not possible to link a Vipps account to multiple accounts on the webshop. The library will throw a ` VippsLoginLinkAccountException` with the `UserError` property set to true. To recover from this, you can give the user the option to remove the link between the webshop account and the Vipps account. You can use the `IVippsLoginCommerceService.RemoveLinkToVippsAccount(CustomerContact contact)` method to remove the link to the existing account.
+
 ### Accessing Vipps user data
 
 The Vipps UserInfo can be accessed by calling `IVippsLoginService.GetVippsUserInfo(IIdentity identity)`, this will give you the user info that was retrieved when the user logged in (cached).
 
 ### Syncing Vipps user data
 
-You may want to store the Vipps data in your database, for example on the Episerver CustomerContact. First, make sure you can access the data you're looking for by configuring the correct scope in your Startup class, for example for Vipps addresses add the `VippsScopes.Address` scope. Once the user has logged in, their `ClaimsIdentity` will contain all the Vipps data you have requested through the scopes. To retrieve these addresses you can use the same `IVippsLoginService.GetVippsUserInfo(IIdentity identity)` to retrieve their UserInfo; including the addresses. If you're using Episerver Commerce, install `Vipps.Login.Episerver.Commerce` and take a look at the Epi page controller example below:
+By default the Vipps user info and the Vipps addresses will be synced during log in. If decide not to sync this data during log in, you might want to sync the data later on.
+To do so you can call `IVippsLoginCommerceService.SyncInfo` and use the `VippsSyncOptions` parameter to configure what to sync:
 
 ```csharp
 public class VippsPageController : PageController<VippsPage>
 {
-    private readonly IVippsLoginService _vippsLoginService;
+    private readonly IVippsLoginCommerceService _vippsLoginCommerceService;
     private readonly CustomerContext _customerContext;
-    public VippsPageController(IVippsLoginService vippsLoginService, CustomerContext customerContext)
+    public VippsPageController(IVippsLoginCommerceService vippsLoginCommerceService, CustomerContext customerContext)
     {
-        _vippsLoginService = vippsLoginService;
+        _vippsLoginCommerceService = vippsLoginCommerceService;
         _customerContext = customerContext;
     }
 
     public ActionResult Index(VippsPage currentPage)
     {
-        SyncPersonalInfo(User.Identity, _customerContext.CurrentContact);
+        // Sync user info and addresses
+        _vippsLoginCommerceService.SyncInfo(
+            User.Identity,
+            _customerContext.CurrentContact,
+            new VippsSyncOptions {
+                SyncContactInfo = true, SyncAddresses = true
+            }
+        );
+
         return View();
     }
-
-    private void SyncPersonalInfo(IIdentity identity, CustomerContact currentContact)
-    {
-        if (identity == null)
-            throw new ArgumentNullException(nameof(identity));
-        if (currentContact == null)
-            throw new ArgumentNullException(nameof(currentContact));
-
-        // Retrieve Vipps user info
-        var vippsUserInfo = _vippsLoginService.GetVippsUserInfo(identity);
-        if (vippsUserInfo == null)
-        {
-            return;
-        }
-
-        // Maps PII fields onto customer contact:
-        // Vipps subject guid, email, firstname, lastname, fullname, birthdate
-        currentContact.MapVippsUserInfo(vippsUserInfo);
-
-        // Sync addresses
-        foreach (var vippsAddress in vippsUserInfo.Addresses)
-        {
-            // Vipps addresses don't have an ID
-            // They can be identifier by Vipps address type
-            var address =
-                currentContact.ContactAddresses.FindVippsAddress(vippsAddress.AddressType);
-            var isNewAddress = address == null;
-            if (isNewAddress)
-            {
-                address = CustomerAddress.CreateInstance();
-                address.AddressType = CustomerAddressTypeEnum.Shipping;
-            }
-
-            // Maps fields onto customer address:
-            // Vipps address type, street, city, postalcode, countrycode
-            address.MapVippsAddress(vippsAddress);
-
-            if (isNewAddress)
-            {
-                currentContact.AddContactAddress(address);
-            }
-            else
-            {
-                currentContact.UpdateContactAddress(address);
-            }
-        }
-
-        currentContact.SaveChanges();
-    }
 }
-
 ```
-
-How you store the data is up to you, of course you don't have to store it, you can just extract it from the users' identity as long as they log in using Vipps.
 
 ## More info
 

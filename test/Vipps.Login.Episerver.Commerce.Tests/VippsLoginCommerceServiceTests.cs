@@ -7,6 +7,7 @@ using Mediachase.BusinessFoundation.Data;
 using Mediachase.Commerce.Customers;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
+using Vipps.Login.Episerver.Commerce.Extensions;
 using Vipps.Login.Models;
 using Xunit;
 
@@ -78,6 +79,38 @@ namespace Vipps.Login.Episerver.Commerce.Tests
 
             var contact = service.FindCustomerContact(Guid.Empty);
             Assert.NotEqual(expectedContact, contact);
+        }
+
+        [Fact]
+        public void RemoveLinkToVippsAccountThrowsIfNull()
+        {
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                A.Fake<ICustomerContactService>());
+
+            Assert.Throws<ArgumentNullException>(() => service.RemoveLinkToVippsAccount(null));
+        }
+
+        [Fact]
+        public void RemoveLinkToVippsAccountShouldRemoveValue()
+        {
+            var customerContactService = A.Fake<ICustomerContactService>();
+            var service = new VippsLoginCommerceService(
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginMapper>(),
+                A.Fake<IVippsLoginDataLoader>(),
+                customerContactService
+                );
+
+            var contact = new CustomerContact();
+            contact.SetVippsSubject(Guid.NewGuid());
+            
+            service.RemoveLinkToVippsAccount(contact);
+            
+            Assert.Null(contact.GetVippsSubject());
+            A.CallTo(() => customerContactService.SaveChanges(contact)).MustHaveHappened();
         }
 
         [Fact]
@@ -508,7 +541,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 A.Fake<ICustomerContactService>());
 
             var context = A.Fake<IOwinContext>();
-            
+
             Assert.True(service.HandleRedirect(context, "https://test.url/redirect-url"));
 
             A.CallTo(() => context.Response.Redirect("/redirect-url")).MustHaveHappened();

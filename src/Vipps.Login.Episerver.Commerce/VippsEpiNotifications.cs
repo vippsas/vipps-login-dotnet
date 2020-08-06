@@ -113,8 +113,8 @@ namespace Vipps.Login.Episerver.Commerce
             }
 
             var emailAddress =
-                ByLinkAccount(context) ??
-                BySubjectGuid(vippsInfo.Sub) ??
+                ByLinkAccount(context, vippsInfo) ??
+                BySubjectGuid(vippsInfo) ??
                 ByEmailOrPhoneNumber(vippsInfo);
 
             // New user
@@ -138,34 +138,45 @@ namespace Vipps.Login.Episerver.Commerce
 
         // Check if we're trying to link an account
         protected virtual string ByLinkAccount(
-            SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+            SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context,
+            VippsUserInfo vippsUserInfo)
         {
             var props = context.AuthenticationTicket.Properties.Dictionary;
             if (props.ContainsKey(VippsConstants.LinkAccount) &&
                 Guid.TryParse(props[VippsConstants.LinkAccount], out var linkAccountToken))
             {
-                var accountToLink = _vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountToken);
-                if (accountToLink != null)
+                // Do not allow linking to multiple accounts
+                string message;
+                if (BySubjectGuid(vippsUserInfo) != null)
                 {
-                    return GetLoginEmailFromContact(accountToLink);
+                    message = "This Vipps account is already linked to an account. Please remove the connection before making a new one.";
+                    Logger.Error($"Vipps.Login: {message}");
+                    throw new VippsLoginLinkAccountException(message, true);
                 }
-                var message = "Could not find account to link to";
-                Logger.Error($"Vipps.Login: {message}");
-                throw new VippsLoginLinkAccountException(message);
+
+                var accountToLink = _vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountToken);
+                if (accountToLink == null)
+                {
+                    message = "Could not find account to link to.";
+                    Logger.Error($"Vipps.Login: {message}");
+                    throw new VippsLoginLinkAccountException(message);
+                }
+
+                return GetLoginEmailFromContact(accountToLink);
             }
             return null;
         }
 
         // Check if we already have a contact for this sub
-        protected virtual string BySubjectGuid(Guid? subjectGuid)
+        protected virtual string BySubjectGuid(VippsUserInfo vippsInfo)
         {
-            if (!subjectGuid.HasValue)
+            if (vippsInfo?.Sub == null)
             {
                 return null;
             }
 
             var customerContact = _vippsCommerceService
-                .FindCustomerContact(subjectGuid.Value);
+                .FindCustomerContact(vippsInfo.Sub);
             return customerContact == null ? null : GetLoginEmailFromContact(customerContact);
         }
 
