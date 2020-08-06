@@ -1,4 +1,4 @@
-# Vipps Log In OIDC Authentication middleware for ASP.NET and Episerver
+# Vipps Log In for ASP.NET and Episerver
 
 ## Description
 
@@ -12,8 +12,8 @@ This repository consists of three NuGet packages:
 
 ## Features
 
-- OWIN Middleware to support Vipps Login OpenIdConnect
-- Library to simplify configuration and set up
+- OWIN Middleware to support Vipps Login through OpenIdConnect
+- Library to simplify Episerver configuration and set up
 
 ## How to get started?
 
@@ -32,7 +32,7 @@ And for the Episerver extensions
 
 Activate and set up Vipps Login: https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login
 
-Configure a redirect URI to your site(s): `https://{your-site}/vipps-login` (fill in the correct url there, it can be localhost as well)
+Configure a redirect URI to your site(s): `https://{your-site}/vipps-login` (replace `{your-site}` with your own url, it can be localhost as well)
 
 Add the ClientId and the ClientSecret to the AppSettings, as such:
 
@@ -145,12 +145,19 @@ public class Startup
                         case VippsLoginSanityCheckException _:
                             message = "Existing account found but did not pass Vipps sanity check. Please log in and link your Vipps account through the profile page.";
                             break;
+                        case VippsLoginLinkAccountException accountException:
+                            if (accountException.UserError)
+                            {
+                                message =
+                                    "Existing account found with a connection to Vipps. Please remove the connection through the profile page.";
+                            }
+                            break;
                     }
 
-                    // 2. Redirect to login page and display message
+                    // 2. Redirect to login or error page and display message
                     context.HandleResponse();
-                    context.Response.Redirect($"/user?error={message}");
-                    return (Task)Task.FromResult<int>(0);
+                    context.Response.Redirect($"/login?error={message}");
+                    return Task.FromResult(0);
                 }
             }
         });
@@ -198,6 +205,19 @@ You can add a ReturnUrl to redirect the user once they are logged in, for exampl
 
 Vipps is using the OpenIdConnect Authorization Code Grant flow, this means the user is redirected back to your environment with a Authorization token. The middleware will validate the token and exchange it for an `id_token` and an `access_token`. A `ClaimsIdentity` will be created which will contain the information of the scopes that you configured (email, name, addresses etc).
 
+### The log in and registration flow
+
+The library implements the recommendations [described by Vipps here](https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#recommendations):
+
+> Even though the website might have separate entry points for registration of new users and login for existing users the functionality related to Vipps login should not differ between these two scenarios. If a new user ends up clicking "login" the merchant should create a new account and log the user into that. If an existing user clicks "register" the merchant should log the user into her existing account. This is because the user might not remember whether she has an account or not and the merchant can get the same information from Vipps login in both these cases.
+>
+> Normally we recommend the checks related to login/registration to be like this:
+>
+> 1. First check if you already have the unique user identifier for Vipps (called "sub" in the response from our API) stored on one of your accounts. If you have it, this means that the user has used Vipps on your site earlier and have an explicit link to the account. In this case use the ID to log the user into her account.
+> 2. If you have not already stored the ID: check if the user already have an account based on phone number and e-mail address. If this gives a match on one (and only one) account, then you can use this to log the user into that account since both phone number and e-mail address is verified in Vipps. Before completing the link it is an advantage to do a "sanity check" on the name of the Vipps user to the name in the existing account to make sure that the account is not an old account where the user has abandoned the phone number or e-mail address an this has been picked up by someone else at a later time.
+> 3. If you get a match on multiple accounts you can provide information on this and offer the user the possibility to log in to her existing account (using the old login method) and then link the account to Vipps.
+> 4. It is also recommended on "my page" or similar in the website to provide the option for logged in users that has not yet linked their profile to Vipps to do so, for an easier login the next time. This just means to provide the "login with Vipps"-button and linking the ID from Vipps with this account.
+
 ### Link Vipps to an existing account
 
 If you want to allow **logged in users** to link to Vipps to their existing non Vipps account, you can add a link the redirect them to `https://{your-site}/vipps-login?LinkAccount=true`. When they visit that link, they will be redirected to Vipps and can go through the log in process. Once they're redirected back to your site, their Vipps account will be linked to their existing account. This means that they will now be able to use Vipps to access their existing account and they can sync their data from Vipps to Episerver.
@@ -219,11 +239,11 @@ public class VippsLoginSanityCheck : IVippsLoginSanityCheck
 
 ### Linking a Vipps account to multiple webshop accounts
 
-It is not possible to link a Vipps account to multiple accounts on the webshop. The library will throw a ` VippsLoginLinkAccountException` with the `UserError` property set to true. To recover from this, you can give the user the option to remove the link between the webshop account and the Vipps account. You can use the `IVippsLoginCommerceService.RemoveLinkToVippsAccount(CustomerContact contact)` method to remove the link to the existing account.
+It is not possible to link a Vipps account to multiple accounts on the webshop. The library will throw a `VippsLoginLinkAccountException` with the `UserError` property set to true. To recover from this, you can give the user the option to remove the link between the webshop account and the Vipps account. You can use the `IVippsLoginCommerceService.RemoveLinkToVippsAccount(CustomerContact contact)` method to remove the link to the existing account.
 
 ### Accessing Vipps user data
 
-The Vipps UserInfo can be accessed by calling `IVippsLoginService.GetVippsUserInfo(IIdentity identity)`, this will give you the user info that was retrieved when the user logged in (cached).
+The Vipps UserInfo can be accessed by calling `IVippsLoginService.GetVippsUserInfo(IIdentity identity)`, this will give you the most recent user info that was retrieved when the user logged in (cached, stored as claims on the identity).
 
 ### Syncing Vipps user data
 
