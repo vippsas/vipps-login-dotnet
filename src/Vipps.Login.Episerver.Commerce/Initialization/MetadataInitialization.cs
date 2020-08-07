@@ -14,6 +14,7 @@ namespace Vipps.Login.Episerver.Commerce.Initialization
         {
             CreateMetaField(AddressEntity.ClassName, MetadataConstants.VippsAddressTypeFieldName, MetadataConstants.VippsAddressTypeFriendlyName);
             CreateGuidMetaField(ContactEntity.ClassName, MetadataConstants.VippsSubjectGuidFieldName, MetadataConstants.VippsSubjectGuidFriendlyName);
+            CreateGuidMetaField(ContactEntity.ClassName, MetadataConstants.VippsLinkAccountTokenFieldName, MetadataConstants.VippsLinkAccountTokenFriendlyName);
         }
 
         private void CreateMetaField(string metaClassName, string metaFieldName, string friendlyName, bool isNullable = true, int maxLength = 255, bool isUnique = false)

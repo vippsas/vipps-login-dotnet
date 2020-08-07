@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using EPiServer.Logging;
@@ -49,7 +50,7 @@ namespace Vipps.Login.Episerver.Commerce
             IVippsLoginCommerceService vippsLoginCommerceService,
             IVippsLoginSanityCheck vippsLoginSanityCheck,
             MapUserKey mapUserKey
-                )
+        ) : base()
         {
             SecurityTokenValidated = DefaultSecurityTokenValidated;
             _synchronizingUserService = synchronizingUserService;
@@ -59,9 +60,40 @@ namespace Vipps.Login.Episerver.Commerce
             _mapUserKey = mapUserKey;
         }
 
+        public VippsEpiNotifications(
+            HttpClient httpClient,
+            ISynchronizingUserService synchronizingUserService,
+            IVippsLoginService vippsLoginService,
+            IVippsLoginCommerceService vippsLoginCommerceService,
+            IVippsLoginSanityCheck vippsLoginSanityCheck,
+            MapUserKey mapUserKey
+        ) : base(httpClient)
+        {
+            SecurityTokenValidated = DefaultSecurityTokenValidated;
+            _synchronizingUserService = synchronizingUserService;
+            _vippsLoginService = vippsLoginService;
+            _vippsCommerceService = vippsLoginCommerceService;
+            _vippsLoginSanityCheck = vippsLoginSanityCheck;
+            _mapUserKey = mapUserKey;
+        }
+
+        protected override void AvoidRedirectLoop(
+            RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+        {
+            var properties = context.OwinContext.Authentication.AuthenticationResponseChallenge.Properties.Dictionary;
+            
+            // Allow LinkAccount request to pass through
+            if (properties.ContainsKey(VippsConstants.LinkAccount) &&
+                !_vippsLoginService.IsVippsIdentity(context.OwinContext.Authentication.User?.Identity))
+            {
+                return;
+            }
+
+            base.AvoidRedirectLoop(context);
+        }
+
         public async Task DefaultSecurityTokenValidated(
-            SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context
-        )
+            SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
         {
             // Prevent redirecting to external Uris
             var redirectUri = new Uri(context.AuthenticationTicket.Properties.RedirectUri,
@@ -80,30 +112,10 @@ namespace Vipps.Login.Episerver.Commerce
                 throw new VippsLoginException(message);
             }
 
-            // First check if we already have a contact for this sub
-            var emailAddress = FindBySubjectGuid(vippsInfo.Sub);
-            if (string.IsNullOrWhiteSpace(emailAddress))
-            {
-                // Try to find contact by vipps email/phone number
-                var contacts = FindByVippsInfo(vippsInfo).ToArray();
-                if (contacts.Length == 1)
-                {
-                    var contact = contacts.First();
-                    if (!_vippsLoginSanityCheck.IsValidContact(contact, vippsInfo))
-                    {
-                        var message = "Existing contact does not pass verification.";
-                        Logger.Warning($"Vipps.Login: {message}. Subject Guid: {vippsInfo.Sub}");
-                        throw new VippsLoginSanityCheckException(message);
-                    }
-                    emailAddress = GetLoginEmailFromContact(contact);
-                }
-                else if (contacts.Length > 1)
-                {
-                    var message = "Multiple accounts found matching this Vipps UserInfo";
-                    Logger.Warning($"Vipps.Login: {message}. Subject Guid: {vippsInfo.Sub}");
-                    throw new VippsLoginDuplicateAccountException(message);
-                }
-            }
+            var emailAddress =
+                ByLinkAccount(context, vippsInfo) ??
+                BySubjectGuid(vippsInfo) ??
+                ByEmailOrPhoneNumber(vippsInfo);
 
             // New user
             if (string.IsNullOrWhiteSpace(emailAddress))
@@ -124,21 +136,77 @@ namespace Vipps.Login.Episerver.Commerce
                 .SynchronizeAsync(identity, new List<string>());
         }
 
-        private IEnumerable<CustomerContact> FindByVippsInfo(VippsUserInfo vippsInfo)
+        // Check if we're trying to link an account
+        protected virtual string ByLinkAccount(
+            SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context,
+            VippsUserInfo vippsUserInfo)
         {
-            return _vippsCommerceService.FindCustomerContacts(vippsInfo.Email, vippsInfo.PhoneNumber);
+            var props = context.AuthenticationTicket.Properties.Dictionary;
+            if (props.ContainsKey(VippsConstants.LinkAccount) &&
+                Guid.TryParse(props[VippsConstants.LinkAccount], out var linkAccountToken))
+            {
+                // Do not allow linking to multiple accounts
+                string message;
+                if (BySubjectGuid(vippsUserInfo) != null)
+                {
+                    message = "This Vipps account is already linked to an account. Please remove the connection before making a new one.";
+                    Logger.Error($"Vipps.Login: {message}");
+                    throw new VippsLoginLinkAccountException(message, true);
+                }
+
+                var accountToLink = _vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountToken);
+                if (accountToLink == null)
+                {
+                    message = "Could not find account to link to.";
+                    Logger.Error($"Vipps.Login: {message}");
+                    throw new VippsLoginLinkAccountException(message);
+                }
+
+                return GetLoginEmailFromContact(accountToLink);
+            }
+            return null;
         }
 
-        protected virtual string FindBySubjectGuid(Guid? subjectGuid)
+        // Check if we already have a contact for this sub
+        protected virtual string BySubjectGuid(VippsUserInfo vippsInfo)
         {
-            if (!subjectGuid.HasValue)
+            if (vippsInfo?.Sub == null)
             {
                 return null;
             }
 
             var customerContact = _vippsCommerceService
-                .FindCustomerContact(subjectGuid.Value);
+                .FindCustomerContact(vippsInfo.Sub);
             return customerContact == null ? null : GetLoginEmailFromContact(customerContact);
+        }
+
+        // Find contact by vipps email/phone number
+        protected virtual string ByEmailOrPhoneNumber(VippsUserInfo vippsInfo)
+        {
+            var contacts = _vippsCommerceService
+                .FindCustomerContacts(vippsInfo.Email, vippsInfo.PhoneNumber)
+                .ToArray();
+            if (contacts.Length == 1)
+            {
+                var contact = contacts.First();
+                if (!_vippsLoginSanityCheck.IsValidContact(contact, vippsInfo))
+                {
+                    var message = "Existing contact does not pass verification.";
+                    Logger.Warning($"Vipps.Login: {message}. Subject Guid: {vippsInfo.Sub}");
+                    throw new VippsLoginSanityCheckException(message);
+                }
+
+                return GetLoginEmailFromContact(contact);
+            }
+
+            if (contacts.Length > 1)
+            {
+                var message = "Multiple accounts found matching this Vipps UserInfo";
+                Logger.Warning($"Vipps.Login: {message}. Subject Guid: {vippsInfo.Sub}");
+                throw new VippsLoginDuplicateAccountException(message);
+            }
+
+            return null;
         }
 
         private string GetLoginEmailFromContact(CustomerContact customerContact)

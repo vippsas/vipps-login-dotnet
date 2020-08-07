@@ -17,6 +17,7 @@ namespace Vipps.Login.Episerver.Commerce.Initialization
 
         public void ConfigureContainer(ServiceConfigurationContext context)
         {
+            context.Services.AddTransient<ICustomerContactService, CustomerContactService>();
             context.Services.AddTransient<IVippsLoginCommerceService, VippsLoginCommerceService>();
             context.Services.AddTransient<IVippsLoginMapper, VippsLoginMapper>();
             context.Services.AddTransient<IVippsLoginDataLoader, VippsLoginDataLoader>();

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using EPiServer.Security;
 using FakeItEasy;
 using Mediachase.Commerce.Customers;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.Owin;
 using Microsoft.Owin.Security;
@@ -30,7 +33,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 A.Fake<IVippsLoginSanityCheck>(),
                 A.Fake<MapUserKey>()
             );
-            
+
             await Assert.ThrowsAsync<VippsLoginException>(async () =>
                 await notifications.DefaultSecurityTokenValidated(CreateContext()));
         }
@@ -68,7 +71,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                     Email = testEmail,
                     PhoneNumber = testPhoneNumber
                 });
-            
+
             // No contact with subject guid
             var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
             A.CallTo(() => vippsCommerceService.FindCustomerContact(A<Guid>._))
@@ -92,6 +95,98 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             );
         }
 
+        // Linked Account user
+        // Account already linked
+        // Find contact with matching subject guid
+        [Fact]
+        public async Task DefaultSecurityTokenValidatedThrowsLinkedAccountAlreadyExists()
+        {
+            var linkAccountGuid = Guid.NewGuid();
+            var testEmail = "test@test.com";
+            var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
+            A.CallTo(() => vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountGuid))
+                .Returns(new CustomerContact() {UserId = testEmail});
+
+            var notifications = new VippsEpiNotifications(
+                A.Fake<ISynchronizingUserService>(),
+                A.Fake<IVippsLoginService>(),
+                vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
+                GetMapUserKey(testEmail)
+            );
+
+            var context = CreateContext();
+            context.AuthenticationTicket.Properties.Dictionary.Add(VippsConstants.LinkAccount,
+                linkAccountGuid.ToString());
+
+            var exception = await Assert.ThrowsAsync<VippsLoginLinkAccountException>(async () => await notifications.DefaultSecurityTokenValidated(context));
+            
+            Assert.True(exception.UserError);
+        }
+
+        // Linked Account user
+        // Find contact with matching subject guid
+        [Fact]
+        public async Task DefaultSecurityTokenValidatedSetsLinkedAccountEmailAsNameClaim()
+        {
+            var linkAccountGuid = Guid.NewGuid();
+            var testEmail = "test@test.com";
+            var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
+            A.CallTo(() => vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountGuid))
+                .Returns(new CustomerContact() { UserId = testEmail });
+            A.CallTo(() => vippsCommerceService.FindCustomerContact(A<Guid>._))
+                .Returns(null);
+
+            var notifications = new VippsEpiNotifications(
+                A.Fake<ISynchronizingUserService>(),
+                A.Fake<IVippsLoginService>(),
+                vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
+                GetMapUserKey(testEmail)
+            );
+
+            var context = CreateContext();
+            context.AuthenticationTicket.Properties.Dictionary.Add(VippsConstants.LinkAccount,
+                linkAccountGuid.ToString());
+
+            await notifications.DefaultSecurityTokenValidated(context);
+            Assert.True(
+                context.AuthenticationTicket.Identity.HasClaim(
+                    context.AuthenticationTicket.Identity.NameClaimType,
+                    testEmail)
+            );
+        }
+
+        // Linked Account user
+        // Throws if no linked account user found
+        [Fact]
+        public async Task DefaultSecurityTokenThrowsIfNoLinkedAccountFound()
+        {
+            var linkAccountGuid = Guid.NewGuid();
+            var testEmail = "test@test.com";
+            var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
+            A.CallTo(() => vippsCommerceService.FindCustomerContactByLinkAccountToken(linkAccountGuid))
+                .Returns(null);
+            A.CallTo(() => vippsCommerceService.FindCustomerContact(A<Guid>._))
+                .Returns(null);
+
+            var notifications = new VippsEpiNotifications(
+                A.Fake<ISynchronizingUserService>(),
+                A.Fake<IVippsLoginService>(),
+                vippsCommerceService,
+                A.Fake<IVippsLoginSanityCheck>(),
+                GetMapUserKey(testEmail)
+            );
+
+            var context = CreateContext();
+            context.AuthenticationTicket.Properties.Dictionary.Add(VippsConstants.LinkAccount,
+                linkAccountGuid.ToString());
+
+            var exception = await Assert.ThrowsAsync<VippsLoginLinkAccountException>(async () =>
+                await notifications.DefaultSecurityTokenValidated(context));
+            Assert.False(exception.UserError);
+        }
+
         // Existing user
         // Find contact with matching subject guid
         [Fact]
@@ -101,7 +196,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
             var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
             A.CallTo(() => vippsCommerceService.FindCustomerContact(A<Guid>._))
                 .Returns(new CustomerContact() {UserId = testEmail});
-           
+
             var notifications = new VippsEpiNotifications(
                 A.Fake<ISynchronizingUserService>(),
                 A.Fake<IVippsLoginService>(),
@@ -144,7 +239,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
 
             // Find with phone or by email
             A.CallTo(() => vippsCommerceService.FindCustomerContacts(testEmail, testPhoneNumber))
-                .Returns(new [] { new CustomerContact { UserId = testEmail } });
+                .Returns(new[] {new CustomerContact {UserId = testEmail}});
 
             var sanityCheck = A.Fake<IVippsLoginSanityCheck>();
             A.CallTo(() => sanityCheck.IsValidContact(A<CustomerContact>._, A<VippsUserInfo>._))
@@ -193,7 +288,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
 
             // Find with phone or by email
             A.CallTo(() => vippsCommerceService.FindCustomerContacts(testEmail, testPhoneNumber))
-                .Returns(new[] { new CustomerContact { UserId = testEmail } });
+                .Returns(new[] {new CustomerContact {UserId = testEmail}});
 
             // Failing sanity check
             var sanityCheck = A.Fake<IVippsLoginSanityCheck>();
@@ -238,7 +333,8 @@ namespace Vipps.Login.Episerver.Commerce.Tests
 
             // Find multiple with phone or by email
             A.CallTo(() => vippsCommerceService.FindCustomerContacts(testEmail, testPhoneNumber))
-                .Returns(new[] { new CustomerContact() { UserId = testEmail }, new CustomerContact() { UserId = $"{testEmail}1" } });
+                .Returns(new[]
+                    {new CustomerContact() {UserId = testEmail}, new CustomerContact() {UserId = $"{testEmail}1"}});
 
             var notifications = new VippsEpiNotifications(
                 A.Fake<ISynchronizingUserService>(),
@@ -254,7 +350,98 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 await notifications.DefaultSecurityTokenValidated(context));
         }
 
-        private SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> CreateContext()
+        [Fact]
+        public async Task RedirectToIdentityProviderReturns403()
+        {
+            var notifications = new VippsEpiNotifications(
+                A.Fake<HttpClient>(),
+                A.Fake<ISynchronizingUserService>(),
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginCommerceService>(),
+                A.Fake<IVippsLoginSanityCheck>(),
+                A.Fake<MapUserKey>());
+
+            var configurationManager =
+                A.Fake<IConfigurationManager<OpenIdConnectConfiguration>>();
+            A.CallTo(() => configurationManager.GetConfigurationAsync(A<CancellationToken>._))
+                .Returns(new OpenIdConnectConfiguration());
+
+            var context = A.Fake<IOwinContext>();
+            var response = new OwinResponse()
+            {
+                StatusCode = 401
+            };
+            A.CallTo(() => context.Response).Returns(response);
+            var request = A.Fake<IOwinRequest>();
+            A.CallTo(() => request.Uri).ReturnsLazily(() => new Uri("https://test.com/asdf"));
+            A.CallTo(() => context.Request).Returns(request);
+
+            var user = A.Fake<ClaimsPrincipal>();
+            A.CallTo(() => context.Authentication.User).Returns(user);
+            A.CallTo(() => user.Identity.IsAuthenticated).Returns(true);
+
+            var notification =
+                new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(
+                    context,
+                    new VippsOpenIdConnectAuthenticationOptions("clientId", "clientSecret", "authority")
+                    {
+                        ConfigurationManager = configurationManager
+                    })
+                {
+                    ProtocolMessage = new OpenIdConnectMessage()
+                };
+            await notifications.RedirectToIdentityProvider(notification);
+            Assert.Equal(403, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task RedirectToIdentityProviderDoesNotReturn403ForLinkAccount()
+        {
+            var notifications = new VippsEpiNotifications(
+                A.Fake<HttpClient>(),
+                A.Fake<ISynchronizingUserService>(),
+                A.Fake<IVippsLoginService>(),
+                A.Fake<IVippsLoginCommerceService>(),
+                A.Fake<IVippsLoginSanityCheck>(),
+                A.Fake<MapUserKey>());
+
+            var configurationManager =
+                A.Fake<IConfigurationManager<OpenIdConnectConfiguration>>();
+            A.CallTo(() => configurationManager.GetConfigurationAsync(A<CancellationToken>._))
+                .Returns(new OpenIdConnectConfiguration());
+
+            var context = A.Fake<IOwinContext>();
+            var response = new OwinResponse()
+            {
+                StatusCode = 401
+            };
+            A.CallTo(() => context.Response).Returns(response);
+            var request = A.Fake<IOwinRequest>();
+            A.CallTo(() => request.Uri).ReturnsLazily(() => new Uri("https://test.com/asdf"));
+            A.CallTo(() => context.Request).Returns(request);
+
+            var properties = new AuthenticationProperties();
+            properties.Dictionary.Add(VippsConstants.LinkAccount, VippsConstants.LinkAccount);
+            A.CallTo(() => context.Authentication.AuthenticationResponseChallenge)
+                .Returns(new AuthenticationResponseChallenge(new[] {""}, properties));
+
+            var notification =
+                new RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>(
+                    context,
+                    new VippsOpenIdConnectAuthenticationOptions("clientId", "clientSecret", "authority")
+                    {
+                        ConfigurationManager = configurationManager
+                    })
+                {
+                    ProtocolMessage = new OpenIdConnectMessage()
+                };
+
+            await notifications.RedirectToIdentityProvider(notification);
+            Assert.NotEqual(403, response.StatusCode);
+        }
+
+        private SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions>
+            CreateContext()
         {
             var options =
                 new VippsOpenIdConnectAuthenticationOptions("clientId", "clientSecret", "authority");

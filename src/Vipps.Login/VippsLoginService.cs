@@ -33,8 +33,8 @@ namespace Vipps.Login
                 return null;
             }
 
-            var subjectClaim = identity.FindFirst(ClaimTypes.NameIdentifier) ??
-                               identity.FindFirst(JwtClaimTypes.Subject);
+            var subjectClaim = identity.FindFirst(JwtClaimTypes.Subject) ??
+                               identity.FindFirst(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(subjectClaim?.Value, out var subject))
             {
                 return null;
@@ -43,15 +43,16 @@ namespace Vipps.Login
             return new VippsUserInfo
             {
                 Sub = subject,
-                BirthDate = ParseDate(identity.FindFirst(ClaimTypes.DateOfBirth) ??
-                                      identity.FindFirst(JwtClaimTypes.BirthDate)),
-                Email = ParseString(identity.FindFirst(ClaimTypes.Email) ?? identity.FindFirst(JwtClaimTypes.Email)),
+                BirthDate = ParseDate(identity.FindFirst(JwtClaimTypes.BirthDate) ??
+                                      identity.FindFirst(ClaimTypes.DateOfBirth)),
+                Email = ParseString(identity.FindFirst(JwtClaimTypes.Email) ??
+                                    identity.FindFirst(ClaimTypes.Email)),
                 EmailVerified = ParseBool(identity.FindFirst(JwtClaimTypes.EmailVerified)),
-                FamilyName = ParseString(identity.FindFirst(ClaimTypes.Surname) ??
-                                         identity.FindFirst(JwtClaimTypes.FamilyName)),
-                GivenName = ParseString(identity.FindFirst(ClaimTypes.GivenName) ??
-                                        identity.FindFirst(JwtClaimTypes.GivenName)),
-                Name = ParseString(identity.FindFirst(ClaimTypes.Name) ?? identity.FindFirst(JwtClaimTypes.Name)),
+                FamilyName = ParseString(identity.FindFirst(JwtClaimTypes.FamilyName) ??
+                                         identity.FindFirst(ClaimTypes.Surname)),
+                GivenName = ParseString(identity.FindFirst(JwtClaimTypes.GivenName) ??
+                                        identity.FindFirst(ClaimTypes.GivenName)),
+                Name = ParseString(identity.FindFirst(JwtClaimTypes.Name) ?? identity.FindFirst(ClaimTypes.Name)),
                 PhoneNumber = ParseString(identity.FindFirst(JwtClaimTypes.PhoneNumber) ??
                                           identity.FindFirst(ClaimTypes.HomePhone) ??
                                           identity.FindFirst(ClaimTypes.MobilePhone) ??
@@ -72,12 +73,14 @@ namespace Vipps.Login
             {
                 return false;
             }
+
             var issuer = identity.FindFirst(JwtClaimTypes.Issuer);
             var validIssuers = GetValidIssuers();
             if (issuer == null)
             {
                 return false;
             }
+
             return validIssuers.Any(validIssuer => issuer.Value.StartsWith(validIssuer));
         }
 
@@ -104,6 +107,7 @@ namespace Vipps.Login
             {
                 return null;
             }
+
             return JsonConvert.DeserializeObject<VippsAddress>(claim.Value);
         }
 

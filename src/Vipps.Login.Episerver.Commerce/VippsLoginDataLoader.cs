@@ -41,6 +41,28 @@ namespace Vipps.Login.Episerver.Commerce
             }
         }
 
+        public IEnumerable<CustomerContact> FindContactsByLinkAccountToken(Guid linkAccountToken)
+        {
+            try
+            {
+                return BusinessManager
+                    .List(ContactEntity.ClassName, new[]
+                    {
+                        new FilterElement(
+                            MetadataConstants.VippsLinkAccountTokenFieldName,
+                            FilterElementType.Equal,
+                            linkAccountToken
+                        )
+                    })
+                    .OfType<CustomerContact>();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Vipps.Login: could not load contacts by linkAccountToken", ex);
+                return Enumerable.Empty<CustomerContact>();
+            }
+        }
+
         public virtual IEnumerable<CustomerContact> FindContactsByEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
