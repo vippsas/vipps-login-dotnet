@@ -3,9 +3,9 @@
   <metadata>
     <id>Vipps.Login</id>
     <version>$version$</version>
-    <authors>Geta</authors>
-    <owners>Vipps</owners>
-    <projectUrl>https://github.com/Geta/vipps-login</projectUrl>
+    <authors>Vipps AS</authors>
+    <owners>Vipps AS</owners>
+    <projectUrl>https://github.com/vippsas/vipps-login-dotnet</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Vipps Login using Microsoft.Owin OpenIdConnect</description>
     <tags>Geta Vipps Login Owin OpenIdConnect</tags>
