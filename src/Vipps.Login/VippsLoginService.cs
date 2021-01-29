@@ -88,7 +88,12 @@ namespace Vipps.Login
         {
             return identity
                 .FindAll(JwtClaimTypes.Address)
-                .Select(DeserializeAddress);
+                .Select(x => DeserializeAddress(x, true))
+                .Union(
+                    identity
+                    .FindAll(VippsClaimTypes.OtherAddresses)
+                    .Select(x => DeserializeAddress(x)))
+                .ToList();
         }
 
         protected virtual IEnumerable<string> GetValidIssuers()
@@ -101,14 +106,16 @@ namespace Vipps.Login
             }
         }
 
-        protected virtual VippsAddress DeserializeAddress(Claim claim)
+        protected virtual VippsAddress DeserializeAddress(Claim claim, bool isPreferred = false)
         {
             if (string.IsNullOrWhiteSpace(claim?.Value))
             {
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<VippsAddress>(claim.Value);
+            var address = JsonConvert.DeserializeObject<VippsAddress>(claim.Value);
+            address.IsPreferred = isPreferred;
+            return address;
         }
 
         protected virtual string ParseString(Claim stringClaim)

@@ -78,9 +78,21 @@ namespace Vipps.Login.Tests
             identity.AddClaims(new[] {_address1, _address2, _address3});
             var userInfo = service.GetVippsUserInfo(identity);
             Assert.Equal(3, userInfo.Addresses.Count());
-            Assert.Equal(1, userInfo.Addresses.Count(x=>x.AddressType.Equals(VippsAddressType.Home)));
+            Assert.Equal(1, userInfo.Addresses.Count(x => x.AddressType.Equals(VippsAddressType.Home)));
             Assert.Equal(1, userInfo.Addresses.Count(x => x.AddressType.Equals(VippsAddressType.Work)));
             Assert.Equal(1, userInfo.Addresses.Count(x => x.AddressType.Equals(VippsAddressType.Other)));
+        }
+
+        [Fact]
+        public void HasPreferredAddress()
+        {
+            var service = new VippsLoginService();
+            var identity = CreateIdentity();
+            identity.AddClaims(new[] { _address1, _address2, _address3 });
+            var userInfo = service.GetVippsUserInfo(identity);
+            Assert.Equal(3, userInfo.Addresses.Count());
+            Assert.Equal(1, userInfo.Addresses.Count(x => x.IsPreferred));
+            Assert.Equal("Rådhusgata 28\nBar 3", userInfo.Addresses.First(x => x.IsPreferred).StreetAddress);
         }
 
         [Fact]
@@ -209,8 +221,8 @@ namespace Vipps.Login.Tests
             return new Claim(claimType, claimValue ?? claimType);
         }
 
-        private readonly Claim _address1 = new Claim(JwtClaimTypes.Address, "{\"address_type\": \"home\",\"country\": \"NO\",\"formatted\": \"BOKS 6300, ETTERSTAD\n0603\nOSLO\nNO\",\"postal_code\": \"0603\",\"region\": \"OSLO\",\"street_address\": \"BOKS 6300, ETTERSTAD\"}");
-        private readonly Claim _address2 = new Claim(JwtClaimTypes.Address, "{\"address_type\": \"work\",\"country\": \"NO\",\"formatted\": \"Skippergata 4\n0152\nOslo\nNO\",\"postal_code\": \"0152\",\"region\": \"Oslo\",\"street_address\": \"Skippergata 4\"}");
+        private readonly Claim _address1 = new Claim(VippsClaimTypes.OtherAddresses, "{\"address_type\": \"home\",\"country\": \"NO\",\"formatted\": \"BOKS 6300, ETTERSTAD\n0603\nOSLO\nNO\",\"postal_code\": \"0603\",\"region\": \"OSLO\",\"street_address\": \"BOKS 6300, ETTERSTAD\"}");
+        private readonly Claim _address2 = new Claim(VippsClaimTypes.OtherAddresses, "{\"address_type\": \"work\",\"country\": \"NO\",\"formatted\": \"Skippergata 4\n0152\nOslo\nNO\",\"postal_code\": \"0152\",\"region\": \"Oslo\",\"street_address\": \"Skippergata 4\"}");
         private readonly Claim _address3 = new Claim(JwtClaimTypes.Address, "{\"address_type\":\"other\",\"country\":\"NO\",\"formatted\":\"Rådhusgata 28\nBar 3\n0151\nOslo\nNO\",\"postal_code\":\"0151\",\"region\":\"Oslo\",\"street_address\":\"Rådhusgata 28\nBar 3\"}");
     }
 }

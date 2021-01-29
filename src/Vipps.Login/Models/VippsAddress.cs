@@ -15,5 +15,6 @@ namespace Vipps.Login.Models
         [JsonProperty("address_type")]
         [JsonConverter(typeof(StringEnumConverter))]
         public VippsAddressType AddressType { get; set; }
+        public bool IsPreferred { get; set; }
     }
 }
