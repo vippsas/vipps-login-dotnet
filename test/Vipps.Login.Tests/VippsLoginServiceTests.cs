@@ -84,11 +84,44 @@ namespace Vipps.Login.Tests
         }
 
         [Fact]
-        public void ParsesNorwegianDate()
+        public void ParsesBirthDate()
         {
             var service = new VippsLoginService();
             var identity = CreateIdentity();
             identity.AddClaim(_birthDateClaim);
+
+            var userInfo = service.GetVippsUserInfo(identity);
+            Assert.Equal(new DateTime(2020, 1, 2), userInfo.BirthDate);
+        }
+
+        [Fact]
+        public void ParsesBirthDate2()
+        {
+            var service = new VippsLoginService();
+            var identity = CreateIdentity();
+            identity.AddClaim(_birthDateClaim2);
+
+            var userInfo = service.GetVippsUserInfo(identity);
+            Assert.Equal(new DateTime(2020, 6,30), userInfo.BirthDate);
+        }
+
+        [Fact]
+        public void ParsesNorwegianBirthDate()
+        {
+            var service = new VippsLoginService();
+            var identity = CreateIdentity();
+            identity.AddClaim(_birthDateClaimNo);
+
+            var userInfo = service.GetVippsUserInfo(identity);
+            Assert.Equal(new DateTime(2020, 1, 2), userInfo.BirthDate);
+        }
+
+        [Fact]
+        public void ParsesNorwegianBirthDate2()
+        {
+            var service = new VippsLoginService();
+            var identity = CreateIdentity();
+            identity.AddClaim(_birthDateClaimNo2);
 
             var userInfo = service.GetVippsUserInfo(identity);
             Assert.Equal(new DateTime(2020, 6, 30), userInfo.BirthDate);
@@ -142,7 +175,6 @@ namespace Vipps.Login.Tests
                 _issuerClaim,
                 _subClaim,
                 _emailClaim,
-                _birthDateClaim,
                 _familyNameClaim,
                 _givenNameClaim,
                 _nameClaim,
@@ -154,7 +186,10 @@ namespace Vipps.Login.Tests
 
         private readonly Claim _issuerClaim = CreateClaim(JwtClaimTypes.Issuer, VippsLoginService.VippsTestApi);
         private readonly Claim _subClaim = CreateClaim(ClaimTypes.NameIdentifier, "3086A8D1-0AE2-4028-B5A8-D41628DDC9E8");
-        private readonly Claim _birthDateClaim = CreateClaim(ClaimTypes.DateOfBirth, "30.6.2020");
+        private readonly Claim _birthDateClaim = CreateClaim(ClaimTypes.DateOfBirth, "2020-01-02");
+        private readonly Claim _birthDateClaim2 = CreateClaim(ClaimTypes.DateOfBirth, "2020-06-30");
+        private readonly Claim _birthDateClaimNo = CreateClaim(ClaimTypes.DateOfBirth, "2.1.2020");
+        private readonly Claim _birthDateClaimNo2 = CreateClaim(ClaimTypes.DateOfBirth, "30.6.2020");
         private readonly Claim _emailClaim = CreateClaim(ClaimTypes.Email);
         private readonly Claim _familyNameClaim = CreateClaim(ClaimTypes.Surname);
         private readonly Claim _givenNameClaim = CreateClaim(ClaimTypes.GivenName);
