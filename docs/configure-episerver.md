@@ -70,6 +70,7 @@ public class Startup
             // 1. Here you pass in the scopes you need
             Scope = string.Join(" ", new []
             {
+                VippsScopes.ApiV2,
                 VippsScopes.OpenId,
                 VippsScopes.Email,
                 VippsScopes.Name,
@@ -81,7 +82,9 @@ public class Startup
             // By default it will handle:
             // RedirectToIdentityProvider - Redirecting to Vipps using correct RedirectUri
             // AuthorizationCodeReceived - Exchange Authentication code for id_token and access_token
-            // DefaultSecurityTokenValidated - Find matching CustomerContact
+            // SecurityTokenValidated - Used to populate ClaimsIdentity and sync to db
+            //      Override this to implement your own logic for finding and creating accounts.
+            //      See VippsEpiNotifications.DefaultSecurityTokenValidated for an example
             Notifications = new VippsEpiNotifications
             {
                 AuthenticationFailed = context =>
@@ -127,7 +130,6 @@ public class Startup
             bool.TryParse(ctx.Request.Query.Get("LinkAccount"), out var linkAccount);
             if (linkAccount && VippsLoginCommerceService.Service.HandleLinkAccount(ctx)) return Task.Delay(0);
 
-            // Return to this url after authenticating
             // Return to this url after authenticating
             var returnUrl = ctx.Request.Query.Get("ReturnUrl");
             if (string.IsNullOrWhiteSpace(returnUrl))

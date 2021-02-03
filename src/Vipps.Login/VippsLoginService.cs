@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Principal;
+using System.Threading.Tasks;
 using IdentityModel;
+using IdentityModel.Client;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Newtonsoft.Json;
 using Vipps.Login.Models;
 
@@ -13,6 +17,7 @@ namespace Vipps.Login
     public class VippsLoginService : IVippsLoginService
     {
         private const string NorwegianLanguageTag = "no";
+        private static readonly HttpClient _httpClient = new HttpClient();
         public const string VippsTestApi = "https://apitest.vipps.no/";
         public const string VippsProdApi = "https://api.vipps.no/";
 
@@ -60,6 +65,20 @@ namespace Vipps.Login
                 Nnin = identity.FindFirst(VippsClaimTypes.Nnin)?.Value,
                 Addresses = GetVippsAddresses(identity)
             };
+        }
+
+        public virtual async Task<IEnumerable<Claim>> GetUserInfoClaims(
+            string userInfoEndpoint,
+            string accessToken)
+        {
+            var response = await _httpClient.GetUserInfoAsync(new UserInfoRequest
+            {
+                Address = userInfoEndpoint,
+                Token = accessToken
+            });
+            if (response.IsError)
+                throw new OpenIdConnectProtocolException(response.Error);
+            return response.Claims;
         }
 
         public virtual bool IsVippsIdentity(IIdentity identity)

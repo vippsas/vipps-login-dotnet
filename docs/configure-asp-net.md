@@ -41,6 +41,7 @@ namespace Your.Namespace
                 // 1. Here you pass in the scopes you need
                 Scope = string.Join(" ", new[]
                 {
+                    VippsScopes.ApiV2,
                     VippsScopes.OpenId,
                     VippsScopes.Email,
                     VippsScopes.Name,
@@ -59,25 +60,38 @@ namespace Your.Namespace
                 {
                     // This will be called after creating the identity and its roles
                     // Can be used to add/delete claims or change other properties or store information in the db
-                    SecurityTokenValidated = ctx =>
+                    SecurityTokenValidated = async context =>
                     {
                         // Prevent redirecting to external Uris
-                        var redirectUri = new Uri(ctx.AuthenticationTicket.Properties.RedirectUri,
+                        var redirectUri = new Uri(context.AuthenticationTicket.Properties.RedirectUri,
                             UriKind.RelativeOrAbsolute);
                         if (redirectUri.IsAbsoluteUri)
                         {
-                            ctx.AuthenticationTicket.Properties.RedirectUri = redirectUri.PathAndQuery;
+                            context.AuthenticationTicket.Properties.RedirectUri = redirectUri.PathAndQuery;
                         }
 
+                        var configuration =
+                            await context.Options.ConfigurationManager
+                                .GetConfigurationAsync(context.Request.CallCancelled)
+                                .ConfigureAwait(false);
+                        var service = new VippsLoginService();
+
+                        // Use access token to retrieve claims from UserInfo endpoint
+                        var claims = await service.GetUserInfoClaims(
+                            configuration.UserInfoEndpoint,
+                            context.ProtocolMessage.AccessToken);
+                        // Add claims to identity
+                        context.AuthenticationTicket.Identity.AddClaims(claims);
+                        // Get UserInfo from identity
+                        var userInfo = service.GetVippsUserInfo(context.AuthenticationTicket.Identity);
+
                         // By default we use email address as username
-                        var identity = ctx.AuthenticationTicket.Identity;
+                        var identity = context.AuthenticationTicket.Identity;
                         identity.AddClaim(
-                            new Claim(identity.NameClaimType, identity.FindFirst(ClaimTypes.Email)?.Value)
+                            new Claim(identity.NameClaimType, userInfo.Email)
                         );
 
-                        // Store user in db?
-
-                        return Task.FromResult(0);
+                        // TODO: Store user in db?
                     },
                     AuthenticationFailed = context =>
                     {

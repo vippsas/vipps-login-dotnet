@@ -81,7 +81,7 @@ namespace Vipps.Login.Episerver.Commerce
             RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
         {
             var properties = context.OwinContext.Authentication.AuthenticationResponseChallenge.Properties.Dictionary;
-            
+
             // Allow LinkAccount request to pass through
             if (properties.ContainsKey(VippsConstants.LinkAccount) &&
                 !_vippsLoginService.IsVippsIdentity(context.OwinContext.Authentication.User?.Identity))
@@ -103,7 +103,53 @@ namespace Vipps.Login.Episerver.Commerce
                 context.AuthenticationTicket.Properties.RedirectUri = redirectUri.PathAndQuery;
             }
 
+            var identity = await GetClaimsIdentity(context).ConfigureAwait(false);
+
+            var userId = GetEpiUserId(context, identity);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                var message = "Could not get UserId for the provided Vipps identity";
+                Logger.Error($"Vipps.Login: {message}");
+                throw new VippsLoginException(message);
+            }
+
+            // Set identifier on ClaimsIdentity
+            // Important, Name is also used to find CustomerContact
+            if (!identity.HasClaim(x => x.Type.Equals(identity.NameClaimType)))
+            {
+                identity.AddClaim(
+                    new Claim(identity.NameClaimType, userId)
+                );
+            }
+
+            // Sync ClaimsIdentity and the roles to Epi db
+            await _synchronizingUserService
+                .SynchronizeAsync(identity, new List<string>());
+        }
+
+        protected virtual async Task<ClaimsIdentity> GetClaimsIdentity(SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
+        {
             var identity = context.AuthenticationTicket.Identity;
+            if (context.Options.Scope.Contains(VippsScopes.ApiV2))
+            {
+                var configuration =
+                    await context.Options.ConfigurationManager
+                        .GetConfigurationAsync(context.Request.CallCancelled)
+                        .ConfigureAwait(false);
+
+                // Use access token to retrieve claims from UserInfo endpoint
+                var userInfoClaims = await _vippsLoginService.GetUserInfoClaims(
+                    configuration.UserInfoEndpoint,
+                    context.ProtocolMessage.AccessToken)
+                    .ConfigureAwait(false);
+                // Add claims to identity
+                identity.AddClaims(userInfoClaims);
+            }
+            return identity;
+        }
+
+        protected virtual string GetEpiUserId(SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context, ClaimsIdentity identity)
+        {
             var vippsInfo = _vippsLoginService.GetVippsUserInfo(identity);
             if (vippsInfo == null)
             {
@@ -112,31 +158,25 @@ namespace Vipps.Login.Episerver.Commerce
                 throw new VippsLoginException(message);
             }
 
-            var emailAddress =
+            // Get existing user identifier (by default Epi will use email address)
+            var userId =
+                // First check if we're linking to an existing account
                 ByLinkAccount(context, vippsInfo) ??
+                // If not, find user by vipps identifier (subject guid)
                 BySubjectGuid(vippsInfo) ??
+                // Or else search user by email/phone
                 ByEmailOrPhoneNumber(vippsInfo);
 
             // New user
-            if (string.IsNullOrWhiteSpace(emailAddress))
+            if (string.IsNullOrWhiteSpace(userId))
             {
-                emailAddress = vippsInfo.Email;
+                userId = vippsInfo.Email;
             }
 
-            // By default Epi will use email address as username
-            if (!identity.HasClaim(x => x.Type.Equals(identity.NameClaimType)))
-            {
-                identity.AddClaim(
-                    new Claim(identity.NameClaimType, emailAddress)
-                );
-            }
-
-            // Sync user and the roles to Epi
-            await _synchronizingUserService
-                .SynchronizeAsync(identity, new List<string>());
+            return userId;
         }
 
-        // Check if we're trying to link an account
+        // Check if we're trying to link an existing account
         protected virtual string ByLinkAccount(
             SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context,
             VippsUserInfo vippsUserInfo)
@@ -149,7 +189,8 @@ namespace Vipps.Login.Episerver.Commerce
                 string message;
                 if (BySubjectGuid(vippsUserInfo) != null)
                 {
-                    message = "This Vipps account is already linked to an account. Please remove the connection before making a new one.";
+                    message =
+                        "This Vipps account is already linked to an account. Please remove the connection before making a new one.";
                     Logger.Error($"Vipps.Login: {message}");
                     throw new VippsLoginLinkAccountException(message, true);
                 }
@@ -164,6 +205,7 @@ namespace Vipps.Login.Episerver.Commerce
 
                 return GetLoginEmailFromContact(accountToLink);
             }
+
             return null;
         }
 
