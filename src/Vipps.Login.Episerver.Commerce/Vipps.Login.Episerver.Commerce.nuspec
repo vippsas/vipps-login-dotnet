@@ -6,6 +6,7 @@
     <authors>Vipps AS</authors>
     <owners>Vipps AS</owners>
     <projectUrl>https://github.com/vippsas/vipps-login-dotnet</projectUrl>
+    <repository type="git" url="https://github.com/vippsas/vipps-login-dotnet" />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Vipps Login for Episerver</description>
     <tags>Geta Vipps Login Episerver</tags>
