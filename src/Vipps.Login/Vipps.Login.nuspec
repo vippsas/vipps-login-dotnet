@@ -10,5 +10,8 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Vipps Login using Microsoft.Owin OpenIdConnect</description>
     <tags>Geta Vipps Login Owin OpenIdConnect</tags>
+    <dependencies>
+      <dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="6.8.0" />
+    </dependencies>
   </metadata>
 </package>

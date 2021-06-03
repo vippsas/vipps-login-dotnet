@@ -72,7 +72,7 @@ namespace Vipps.Login
             OpenIdConnectMessage message;
             try
             {
-                message = new OpenIdConnectMessage(tokenResponse.Json);
+                message = new OpenIdConnectMessage(tokenResponse.Json.ToString());
             }
             catch (Exception ex)
             {
