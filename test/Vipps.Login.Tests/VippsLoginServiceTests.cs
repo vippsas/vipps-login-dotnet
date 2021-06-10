@@ -71,6 +71,16 @@ namespace Vipps.Login.Tests
         }
 
         [Fact]
+        public void IgnoresEmptyAddresses()
+        {
+            var service = new VippsLoginService();
+            var identity = CreateIdentity();
+            identity.AddClaims(new[] { _emptyAddress });
+            var userInfo = service.GetVippsUserInfo(identity);
+            Assert.Equal(0, userInfo.Addresses.Count());
+        }
+
+        [Fact]
         public void HasThreeAddresses()
         {
             var service = new VippsLoginService();
@@ -221,6 +231,7 @@ namespace Vipps.Login.Tests
             return new Claim(claimType, claimValue ?? claimType);
         }
 
+        private readonly Claim _emptyAddress = new Claim(VippsClaimTypes.OtherAddresses, "{\"address_type\": \"\",\"country\": \"\",\"formatted\": \"\",\"postal_code\": \"\",\"region\": \"\",\"street_address\": \"\"}");
         private readonly Claim _address1 = new Claim(VippsClaimTypes.OtherAddresses, "{\"address_type\": \"home\",\"country\": \"NO\",\"formatted\": \"BOKS 6300, ETTERSTAD\n0603\nOSLO\nNO\",\"postal_code\": \"0603\",\"region\": \"OSLO\",\"street_address\": \"BOKS 6300, ETTERSTAD\"}");
         private readonly Claim _address2 = new Claim(VippsClaimTypes.OtherAddresses, "{\"address_type\": \"work\",\"country\": \"NO\",\"formatted\": \"Skippergata 4\n0152\nOslo\nNO\",\"postal_code\": \"0152\",\"region\": \"Oslo\",\"street_address\": \"Skippergata 4\"}");
         private readonly Claim _address3 = new Claim(JwtClaimTypes.Address, "{\"address_type\":\"other\",\"country\":\"NO\",\"formatted\":\"Rådhusgata 28\nBar 3\n0151\nOslo\nNO\",\"postal_code\":\"0151\",\"region\":\"Oslo\",\"street_address\":\"Rådhusgata 28\nBar 3\"}");
