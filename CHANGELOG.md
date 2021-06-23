@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2]
+
+Fix to ignore empty addresses
+
 ## [0.2.1]
 
 Update Microsoft.IdentityModel.Protocols.OpenIdConnect to version 6.8.0

@@ -10,6 +10,7 @@ using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Vipps.Login.Models;
 
 namespace Vipps.Login
@@ -112,6 +113,7 @@ namespace Vipps.Login
                     identity
                     .FindAll(VippsClaimTypes.OtherAddresses)
                     .Select(x => DeserializeAddress(x)))
+                .Where(x => x != null)
                 .ToList();
         }
 
@@ -132,7 +134,15 @@ namespace Vipps.Login
                 return null;
             }
 
-            var address = JsonConvert.DeserializeObject<VippsAddress>(claim.Value);
+            var addressObject = JObject.Parse(claim.Value);
+
+            // Ignore if address type is empty
+            var token = addressObject["address_type"];
+            if(token is null || (token.Type == JTokenType.String && string.IsNullOrWhiteSpace(token.ToString())))
+            {
+                return null;
+            }
+            var address = addressObject.ToObject<VippsAddress>();
             address.IsPreferred = isPreferred;
             return address;
         }
