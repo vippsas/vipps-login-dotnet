@@ -2,7 +2,6 @@
 {
     public static class VippsScopes
     {
-        public const string ApiV2 = "api_version_2";
         public const string OpenId = "openid";
         public const string Name = "name";
         public const string Email = "email";

@@ -83,42 +83,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
 
 
         [Fact]
-        public async Task DefaultSecurityToken_V1_ValidatedDontGetUserInfoClaim()
-        {
-            var testEmail = "test@test.com";
-
-            var vippsLoginService = A.Fake<IVippsLoginService>();
-
-            A.CallTo(() => vippsLoginService.GetVippsUserInfo(A<ClaimsIdentity>._))
-                .Returns(new VippsUserInfo
-                {
-                    Email = testEmail
-                });
-            
-
-            // No contact with subject guid
-            var vippsCommerceService = A.Fake<IVippsLoginCommerceService>();
-            A.CallTo(() => vippsCommerceService.FindCustomerContact(A<Guid>._))
-                .Returns(null);
-
-            var notifications = new VippsEpiNotifications(
-                A.Fake<ISynchronizingUserService>(),
-                vippsLoginService,
-                vippsCommerceService,
-                A.Fake<IVippsLoginSanityCheck>(),
-                GetMapUserKey(testEmail)
-            );
-
-            var context = CreateContext();
-
-            await notifications.DefaultSecurityTokenValidated(context);
-
-            A.CallTo(() => vippsLoginService.GetUserInfoClaims(A<string>._, A<string>._))
-                 .MustNotHaveHappened();
-        }
-
-        [Fact]
-        public async Task DefaultSecurityTokenValidated_V2_GetUserInfoClaims()
+        public async Task DefaultSecurityTokenValidated_GetUserInfoClaims()
         {
             var testEmail = "test@test.com";
 
@@ -150,7 +115,7 @@ namespace Vipps.Login.Episerver.Commerce.Tests
                 GetMapUserKey(testEmail)
             );
 
-            var context = CreateContext(scope: VippsScopes.ApiV2);
+            var context = CreateContext();
 
             await notifications.DefaultSecurityTokenValidated(context);
 
