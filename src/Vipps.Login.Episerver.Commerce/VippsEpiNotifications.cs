@@ -130,21 +130,20 @@ namespace Vipps.Login.Episerver.Commerce
         protected virtual async Task<ClaimsIdentity> GetClaimsIdentity(SecurityTokenValidatedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> context)
         {
             var identity = context.AuthenticationTicket.Identity;
-            if (context.Options.Scope.Contains(VippsScopes.ApiV2))
-            {
-                var configuration =
-                    await context.Options.ConfigurationManager
-                        .GetConfigurationAsync(context.Request.CallCancelled)
-                        .ConfigureAwait(false);
-
-                // Use access token to retrieve claims from UserInfo endpoint
-                var userInfoClaims = await _vippsLoginService.GetUserInfoClaims(
-                    configuration.UserInfoEndpoint,
-                    context.ProtocolMessage.AccessToken)
+            
+            var configuration =
+                await context.Options.ConfigurationManager
+                    .GetConfigurationAsync(context.Request.CallCancelled)
                     .ConfigureAwait(false);
-                // Add claims to identity
-                identity.AddClaims(userInfoClaims);
-            }
+
+            // Use access token to retrieve claims from UserInfo endpoint
+            var userInfoClaims = await _vippsLoginService.GetUserInfoClaims(
+                configuration.UserInfoEndpoint,
+                context.ProtocolMessage.AccessToken)
+                .ConfigureAwait(false);
+            // Add claims to identity
+            identity.AddClaims(userInfoClaims);
+            
             return identity;
         }
 
