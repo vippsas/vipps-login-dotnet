@@ -1,8 +1,6 @@
 # Vipps Log In for ASP.NET and Episerver
 
-**This plugin is currently a test pilot (pre-release). It is very likely that you will encounter bugs or scenarios that are not yet supported.**
-
-**Please keep up to date with updates as soon as they happen. They are very important in this pre-release period.**
+**Please keep up to date with updates as soon as they happen.**
 
 **We encourage you to create an issue here if you require assistance or run in to a problem.**
 
