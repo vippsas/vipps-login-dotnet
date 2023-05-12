@@ -156,7 +156,7 @@ public class Startup
 }
 ```
 
-When the user goes to `https://{your-site}/vipps-login`, the Vipps middleware will be triggered and it will redirect the user to the Vipps log in environment. You will have to configure this redirect URL in Vipps, as described here: https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login
+When the user goes to `https://{your-site}/vipps-login`, the Vipps middleware will be triggered and it will redirect the user to the Vipps log in environment. You will have to configure this redirect URL in Vipps, as described here: https://developer.vippsmobilepay.com/docs/APIs/login-api/vipps-login-api-faq/#how-can-i-activate-and-set-up-vipps-login
 
 You can add a ReturnUrl to redirect the user once they are logged in, for example `https://{your-site}/vipps-login?ReturnUrl=/vipps-landing`.
 
@@ -164,7 +164,7 @@ Vipps is using the OpenIdConnect Authorization Code Grant flow, this means the u
 
 ### The log in and registration flow
 
-The library implements the recommendations [described by Vipps here](https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#recommendations):
+The library implements the recommendations [described by Vipps here](https://developer.vippsmobilepay.com/docs/APIs/login-api/api-guide/important-information/#recommendations-on-linking-to-user-account):
 
 > Even though the website might have separate entry points for registration of new users and login for existing users the functionality related to Vipps login should not differ between these two scenarios. If a new user ends up clicking "login" the merchant should create a new account and log the user into that. If an existing user clicks "register" the merchant should log the user into her existing account. This is because the user might not remember whether she has an account or not and the merchant can get the same information from Vipps login in both these cases.
 >
