@@ -41,7 +41,7 @@ Here you can find the default configuration for the Vipps OIDC middleware. Some 
 
 1. Be sure to configure only the scopes you actually need.
 2. If authentication fails, we suggest redirecting to the normal login page and show an informational message.
-3. Determine what you which information from Vipps you want to sync. By default we will update the customer contact and the customer addresses upon login.
+3. Determine what you which information from Vipps you want to sync. By default, we will update the customer contact and the customer addresses upon login.
 
 ```csharp
 public class Startup
@@ -160,7 +160,7 @@ When the user goes to `https://{your-site}/vipps-login`, the Vipps middleware wi
 
 You can add a ReturnUrl to redirect the user once they are logged in, for example `https://{your-site}/vipps-login?ReturnUrl=/vipps-landing`.
 
-Vipps is using the OpenIdConnect Authorization Code Grant flow, this means the user is redirected back to your environment with a Authorization token. The middleware will validate the token and exchange it for an `id_token` and an `access_token`. A `ClaimsIdentity` will be created which will contain the information of the scopes that you configured (email, name, addresses etc).
+Vipps is using the OpenIdConnect Authorization Code Grant flow, this means the user is redirected back to your environment with an Authorization token. The middleware will validate the token and exchange it for an `id_token` and an `access_token`. A `ClaimsIdentity` will be created which will contain the information of the scopes that you configured (email, name, addresses etc.).
 
 ### The log in and registration flow
 
@@ -171,9 +171,9 @@ The library implements the recommendations [described by Vipps here](https://git
 > Normally we recommend the checks related to login/registration to be like this:
 >
 > 1. First check if you already have the unique user identifier for Vipps (called "sub" in the response from our API) stored on one of your accounts. If you have it, this means that the user has used Vipps on your site earlier and have an explicit link to the account. In this case use the ID to log the user into her account.
-> 2. If you have not already stored the ID: check if the user already have an account based on phone number and e-mail address. If this gives a match on one (and only one) account, then you can use this to log the user into that account since both phone number and e-mail address is verified in Vipps. Before completing the link it is an advantage to do a "sanity check" on the name of the Vipps user to the name in the existing account to make sure that the account is not an old account where the user has abandoned the phone number or e-mail address an this has been picked up by someone else at a later time.
+> 2. If you have not already stored the ID: check if the user already have an account based on phone number and e-mail address. If this gives a match on one (and only one) account, then you can use this to log the user into that account since both phone number and e-mail address is verified in Vipps. Before completing the link it is an advantage to do a "sanity check" on the name of the Vipps user to the name in the existing account to make sure that the account is not an old account where the user has abandoned the phone number or e-mail address and this has been picked up by someone else at a later time.
 > 3. If you get a match on multiple accounts you can provide information on this and offer the user the possibility to log in to her existing account (using the old login method) and then link the account to Vipps.
-> 4. It is also recommended on "my page" or similar in the website to provide the option for logged in users that has not yet linked their profile to Vipps to do so, for an easier login the next time. This just means to provide the "login with Vipps"-button and linking the ID from Vipps with this account.
+> 4. It is also recommended on "my page" or similar on the website to provide the option for logged-in users that has not yet linked their profile to Vipps to do so, for an easier login the next time. This just means to provide the "login with Vipps"-button and linking the ID from Vipps with this account.
 
 ### Link Vipps to an existing account
 
@@ -181,8 +181,8 @@ If you want to allow **logged in users** to link to Vipps to their existing non 
 
 ### Customized 'sanity check' during login
 
-If the user tries to log in with Vipps and there is an existing account that matches the Vipps information (email or phone number), the library will execute a 'sanity check'. This is done to make sure that the account is not an old account where the user has abandoned the phone number or e-mail address an this has been picked up by someone else at a later time.
-By default it will compare the first name and the last name, however it is easy to change this behaviour by implementing a custom sanity check and registering it in the DI container:
+If the user tries to log in with Vipps and there is an existing account that matches the Vipps information (email or phone number), the library will execute a 'sanity check'. This is done to make sure that the account is not an old account where the user has abandoned the phone number or e-mail address and this has been picked up by someone else at a later time.
+By default, it will compare the first name and the last name, however it is easy to change this behaviour by implementing a custom sanity check and registering it in the DI container:
 
 ```csharp
 public class VippsLoginSanityCheck : IVippsLoginSanityCheck
@@ -200,7 +200,7 @@ It is not possible to link a Vipps account to multiple accounts on the webshop. 
 
 ### Syncing Vipps user data
 
-By default the Vipps user info and the Vipps addresses will be synced during log in. If decide not to sync this data during log in, you might want to sync the data later on.
+By default, the Vipps user info and the Vipps addresses will be synced during log in. If decide not to sync this data during log in, you might want to sync the data later on.
 To do so you can call `IVippsLoginCommerceService.SyncInfo` and use the `VippsSyncOptions` parameter to configure what to sync:
 
 ```csharp
