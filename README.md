@@ -6,7 +6,7 @@
 
 ## Description
 
-This repository contains the code to use Vipps Log In OpenIdConnect (OIDC) Authentication middleware in your ASP.NET application using OWIN. Information about the Vipps Log In API can be found here: https://github.com/vippsas/vipps-login-api
+This repository contains the code to use Vipps Log In OpenIdConnect (OIDC) Authentication middleware in your ASP.NET application using OWIN. Information about the Vipps Log In API can be found here: https://developer.vippsmobilepay.com/docs/APIs/login-api/
 
 This repository consists of three NuGet packages:
 
@@ -34,7 +34,7 @@ And for the Episerver extensions
 
 ### Get API keys for Vipps Log In API
 
-Activate and set up Vipps Login: https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login
+Activate and set up Vipps Login: https://developer.vippsmobilepay.com/docs/APIs/login-api/vipps-login-api-faq/#how-can-i-activate-and-set-up-vipps-login
 
 Configure a redirect URI to your site(s): `https://{your-site}/vipps-login` (replace `{your-site}` with your own host name, it can be localhost as well)
 
@@ -52,7 +52,7 @@ For production use
 <add key="VippsLogin:Authority" value="https://api.vipps.no/access-management-1.0/access" />
 ```
 
-See https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#base-urls
+See https://developer.vippsmobilepay.com/docs/vipps-developers/test-environment/#test-server
 
 ### Configuration
 
@@ -84,8 +84,8 @@ public class AccountController : Controller
 
 ## More info
 
-- https://github.com/vippsas/vipps-login-api
-- https://github.com/vippsas/vipps-developers
+- https://developer.vippsmobilepay.com/docs/APIs/login-api/
+- https://developer.vippsmobilepay.com/
 - https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
 - https://world.episerver.com/documentation/developer-guides/commerce/security/support-for-openid-connect-in-episerver-commerce/
 
