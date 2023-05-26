@@ -1,8 +1,8 @@
 # Vipps Log In for ASP.NET and Episerver
 
-**Please keep up to date with updates as soon as they happen.**
+*Please keep up to date with updates as soon as they happen.*
 
-**We encourage you to create an issue here if you require assistance or run in to a problem.**
+We encourage you to create an issue here if you require assistance or run in to a problem.
 
 ## Description
 
@@ -34,11 +34,11 @@ And for the Episerver extensions
 
 ### Get API keys for Vipps Log In API
 
-Activate and set up Vipps Login: https://developer.vippsmobilepay.com/docs/APIs/login-api/vipps-login-api-faq/#how-can-i-activate-and-set-up-vipps-login
+Activate and set up [Vipps Login](https://developer.vippsmobilepay.com/docs/APIs/login-api/vipps-login-api-faq/#how-can-i-activate-and-set-up-vipps-login).
 
-Configure a redirect URI to your site(s): `https://{your-site}/vipps-login` (replace `{your-site}` with your own host name, it can be localhost as well)
+Configure a redirect URI to your site(s): `https://{your-site}/vipps-login`. Replace `{your-site}` with your own host name. It can be `localhost`, as well.
 
-To use the `VippsLoginConfig` helper class, add the ClientId and the ClientSecret to the Web.Config AppSettings, as such:
+To use the `VippsLoginConfig` helper class, add the `ClientId` and the `ClientSecret` to the `Web.Config AppSettings`, as such:
 
 ```config
 <add key="VippsLogin:ClientId" value="..." />
@@ -46,13 +46,14 @@ To use the `VippsLoginConfig` helper class, add the ClientId and the ClientSecre
 <add key="VippsLogin:Authority" value="https://apitest.vipps.no/access-management-1.0/access" />
 ```
 
-For production use
+For production, use:
 
-```Here you can find the default configuration for the Vipps OIDC middleware.
+```config
 <add key="VippsLogin:Authority" value="https://api.vipps.no/access-management-1.0/access" />
 ```
 
-See https://developer.vippsmobilepay.com/docs/vipps-developers/test-environment/#test-server
+See [Vipps test server](https://developer.vippsmobilepay.com/docs/vipps-developers/test-environment/#test-server)
+to find the default configuration for the Vipps OIDC middleware.
 
 ### Configuration
 
@@ -63,7 +64,9 @@ Now you can configure your ASP.NET or Episerver application:
 
 ### Accessing Vipps user data
 
-The Vipps UserInfo can be accessed by using the `GetVippsUserInfo(IIdentity identity)` method on `IVippsLoginService`, this will give you the most recent user info that was retrieved when the user logged in (cached, stored as claims on the identity).
+The [Vipps UserInfo](https://developer.vippsmobilepay.com/docs/APIs/userinfo-api/)
+can be accessed by using the `GetVippsUserInfo(IIdentity identity)` method on `IVippsLoginService`.
+This will give you the most recent user info that was retrieved when the user logged in (cached, stored as claims on the identity).
 
 ```csharp
 public class AccountController : Controller
@@ -84,10 +87,11 @@ public class AccountController : Controller
 
 ## More info
 
-- https://developer.vippsmobilepay.com/docs/APIs/login-api/
-- https://developer.vippsmobilepay.com/
-- https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth
-- https://world.episerver.com/documentation/developer-guides/commerce/security/support-for-openid-connect-in-episerver-commerce/
+- [Vipps Log In for ASP.NET and Episerver GitHub Repository](https://github.com/vippsas/vipps-login-dotnet)
+- [Vipps Login API](https://developer.vippsmobilepay.com/docs/APIs/login-api/)
+- [Vipps Developer Documentation](https://developer.vippsmobilepay.com/)
+- [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth)
+- [OpenID Connect and Azure AD](https://world.episerver.com/documentation/developer-guides/commerce/security/support-for-openid-connect-in-episerver-commerce/)
 
 ## Package maintainer
 

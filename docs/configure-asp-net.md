@@ -1,6 +1,6 @@
 # Configure Vipps Log In for ASP.NET
 
-Here you can find the default configuration for the Vipps OIDC middleware. Some tips:
+Here, you can find the default configuration for the Vipps OIDC middleware. Some tips:
 
 1. Be sure to configure only the scopes you actually need.
 2. If authentication fails, we suggest redirecting to the normal login page and show an informational message.
