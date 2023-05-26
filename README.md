@@ -10,7 +10,7 @@ This repository contains the code to use Vipps Log In OpenIdConnect (OIDC) Authe
 Information about the Vipps Login API can be found [here](https://developer.vippsmobilepay.com/docs/APIs/login-api/).
 
 
-This module is published on GitHub at [vipps-login-dotnet](https://github.com/vippsas/vipps-login-dotnet).
+This module is published on [GitHub](https://github.com/vippsas/vipps-login-dotnet).
 
 
 This repository consists of three NuGet packages:
