@@ -182,7 +182,7 @@ If you want to allow *logged in users* to link to Vipps to their existing non Vi
 ### Customized 'sanity check' during login
 
 If the user tries to log in with Vipps and there is an existing account that matches the Vipps information (email or phone number), the library will execute a 'sanity check'. This is done to make sure that the account is not an old account where the user has abandoned the phone number or e-mail address and this has been picked up by someone else at a later time.
-By default, it will compare the first name and the last name, however it is easy to change this behaviour by implementing a custom sanity check and registering it in the DI container:
+By default, it will compare the first name and the last name, however it is easy to change this behavior by implementing a custom sanity check and registering it in the DI container:
 
 ```csharp
 public class VippsLoginSanityCheck : IVippsLoginSanityCheck
