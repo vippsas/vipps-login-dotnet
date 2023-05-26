@@ -6,7 +6,10 @@ We encourage you to create an issue here if you require assistance or run in to 
 
 ## Description
 
-This repository contains the code to use Vipps Log In OpenIdConnect (OIDC) Authentication middleware in your ASP.NET application using OWIN. Information about the Vipps Log In API can be found here: https://developer.vippsmobilepay.com/docs/APIs/login-api/
+This repository contains the code to use Vipps Log In OpenIdConnect (OIDC) Authentication middleware in your ASP.NET application using OWIN. Information about the Vipps Login API can be found [here](https://developer.vippsmobilepay.com/docs/APIs/login-api/).
+
+
+This module is published on [github.com](https://github.com/vippsas/vipps-login-dotnet).
 
 This repository consists of three NuGet packages:
 
@@ -87,7 +90,7 @@ public class AccountController : Controller
 
 ## More info
 
-- [Vipps Log In for ASP.NET and Episerver GitHub Repository](https://github.com/vippsas/vipps-login-dotnet)
+- [GitHub Repository](https://github.com/vippsas/vipps-login-dotnet)
 - [Vipps Login API](https://developer.vippsmobilepay.com/docs/APIs/login-api/)
 - [Vipps Developer Documentation](https://developer.vippsmobilepay.com/)
 - [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth)
