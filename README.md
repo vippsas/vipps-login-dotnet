@@ -1,6 +1,10 @@
 # Vipps Log In for ASP.NET and Episerver
 
-*Please keep up to date with updates as soon as they happen.*
+<!-- START_COMMENT -->
+💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
+<!-- END_COMMENT -->
+
+*Please keep up-to-date with updates as soon as they happen.*
 
 We encourage you to create an issue here if you require assistance or run in to a problem.
 
@@ -15,9 +19,9 @@ This module is published on [GitHub](https://github.com/vippsas/vipps-login-dotn
 
 This repository consists of three NuGet packages:
 
-- Vipps.Login - OWIN Middleware that enables an application to use OpenIdConnect for authentication.
-- Vipps.Login.Episerver - Episerver code for Vipps Login
-- Vipps.Login.Episerver.Commerce - Episerver Commerce code for Vipps Login
+- `Vipps.Login` - OWIN Middleware that enables an application to use OpenIdConnect for authentication.
+- `Vipps.Login.Episerver` - Episerver code for Vipps Login
+- `Vipps.Login.Episerver.Commerce` - Episerver Commerce code for Vipps Login
 
 ## Features
 
