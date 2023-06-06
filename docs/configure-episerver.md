@@ -1,8 +1,17 @@
-# Configure Vipps Log In for Episerver
+<!-- START_METADATA
+---
+sidebar_label: Configure for Optimizely
+hide_table_of_contents: true
+pagination_next: null
+pagination_prev: null
+---
+END_METADATA -->
 
-Vipps Log In middleware uses OpenID Connect, so first we need to prepare Episerver for OpenID Connect.
+# Configure Login for Optimizely
 
-Described in detail [here](https://world.episerver.com/documentation/developer-guides/CMS/security/integrate-azure-ad-using-openid-connect/).
+Vipps Login middleware uses OpenID Connect, so first we need to prepare Episerver for OpenID Connect.
+
+Described in detail on the [episerver](https://world.episerver.com/documentation/developer-guides/CMS/security/integrate-azure-ad-using-openid-connect/) site.
 
 #### 1. Disable Role and Membership Providers
 

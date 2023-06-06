@@ -1,4 +1,13 @@
-# Configure Vipps Log In for ASP.NET
+<!-- START_METADATA
+---
+sidebar_label: Configure for ASP.NET
+hide_table_of_contents: true
+pagination_next: null
+pagination_prev: null
+---
+END_METADATA -->
+
+# Configure Login for ASP.NET
 
 Here, you can find the default configuration for the Vipps OIDC middleware. Some tips:
 
