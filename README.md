@@ -7,7 +7,7 @@ pagination_prev: null
 ---
 END_METADATA -->
 
-# Login for ASP.NET and Episerver
+# Login for ASP.NET and Optimizely
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
