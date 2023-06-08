@@ -1,6 +1,6 @@
 <!-- START_METADATA
 ---
-title: Login for ASP.NET and Episerver plugin
+title: Login for ASP.NET and Optimizely plugin
 sidebar_position: 1
 pagination_next: null
 pagination_prev: null
@@ -26,8 +26,10 @@ Information about the Vipps Login API can be found [here](https://developer.vipp
 This repository consists of three NuGet packages:
 
 - `Vipps.Login` - OWIN Middleware that enables an application to use OpenIdConnect for authentication.
-- `Vipps.Login.Episerver` - Episerver code for Vipps Login
-- `Vipps.Login.Episerver.Commerce` - Episerver Commerce code for Vipps Login
+- `Vipps.Login.Episerver` - Episerver code for Vipps Login.
+- `Vipps.Login.Episerver.Commerce` - Episerver Commerce code for Vipps Login.
+
+Note that Optimizely was previously called Episerver.
 
 ## Features
 
