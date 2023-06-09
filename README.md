@@ -1,27 +1,25 @@
 <!-- START_METADATA
 ---
-title: Login for ASP.NET and Optimizely plugin
+title: Vipps Login for ASP.NET and Optimizely plugin
 sidebar_position: 1
 pagination_next: null
 pagination_prev: null
 ---
 END_METADATA -->
 
-# Login for ASP.NET and Optimizely
+# Vipps Login for ASP.NET and Optimizely
+
+*This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet).*
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
 <!-- END_COMMENT -->
 
-This module is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet).
 Please keep up-to-date with updates as soon as they happen.
-
-We encourage you to [create an issue](https://github.com/vippsas/vipps-login-dotnet/issues) if you require assistance or run in to a problem.
 
 ## Description
 
 This repository contains the code to use Vipps Log In OpenIdConnect (OIDC) Authentication middleware in your ASP.NET application using OWIN.
-Information about the Vipps Login API can be found [here](https://developer.vippsmobilepay.com/docs/APIs/login-api/).
 
 This repository consists of three NuGet packages:
 
@@ -29,7 +27,12 @@ This repository consists of three NuGet packages:
 - `Vipps.Login.Episerver` - Episerver code for Vipps Login.
 - `Vipps.Login.Episerver.Commerce` - Episerver Commerce code for Vipps Login.
 
-Note that Optimizely was previously called Episerver.
+Note that Optimizely was previously called *Episerver*.
+
+For more information, see:
+
+* [Vipps Optimizely plugin page](https://vipps.no/produkter-og-tjenester/bedrift/ta-betalt-paa-nett/ta-betalt-paa-nett/episerver/)
+* [Vipps Login API guide](https://developer.vippsmobilepay.com/docs/APIs/login-api/)
 
 ## Features
 
