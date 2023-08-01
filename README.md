@@ -72,7 +72,7 @@ For production, use:
 <add key="VippsLogin:Authority" value="https://api.vipps.no/access-management-1.0/access" />
 ```
 
-See [Vipps test server](https://developer.vippsmobilepay.com/docs/vipps-developers/test-environment/#test-server)
+See [Vipps test server](https://developer.vippsmobilepay.com/docs/test-environment/#test-server)
 to find the default configuration for the Vipps OIDC middleware.
 
 ### Configuration
