@@ -12,7 +12,7 @@ END_METADATA -->
 *This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet).*
 
 <!-- START_COMMENT -->
-💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/vipps-plugins/). 💥
+💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/plugins/). 💥
 <!-- END_COMMENT -->
 
 Please keep up-to-date with updates as soon as they happen.
@@ -72,7 +72,7 @@ For production, use:
 <add key="VippsLogin:Authority" value="https://api.vipps.no/access-management-1.0/access" />
 ```
 
-See [Vipps test server](https://developer.vippsmobilepay.com/docs/vipps-developers/test-environment/#test-server)
+See [Vipps test server](https://developer.vippsmobilepay.com/docs/test-environment/#test-server)
 to find the default configuration for the Vipps OIDC middleware.
 
 ### Configuration
