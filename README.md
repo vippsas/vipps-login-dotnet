@@ -9,7 +9,9 @@ END_METADATA -->
 
 # Vipps Login for ASP.NET and Optimizely
 
-*This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet).*
+[![Support and development by Geta ](./docs/images/geta.svg#gh-light-mode-only)![Support and development by Geta](./docs/images/geta_dark.svg#gh-dark-mode-only)](https://getadigital.com/?epslanguage=en)
+
+*This plugin is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet).*
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/plugins/). 💥
