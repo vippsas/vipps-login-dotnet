@@ -113,7 +113,7 @@ public class AccountController : Controller
 - [Vipps Login API](https://developer.vippsmobilepay.com/docs/APIs/login-api/)
 - [Vipps Developer Documentation](https://developer.vippsmobilepay.com/)
 - [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth)
-- [OpenID Connect and Azure AD](https://world.episerver.com/documentation/developer-guides/commerce/security/support-for-openid-connect-in-episerver-commerce/)
+- [OpenID Connect and Azure AD](https://docs.developers.optimizely.com/customized-commerce/docs/support-for-openid-connect-in-customized-commerce)
 
 ## Package maintainer
 
