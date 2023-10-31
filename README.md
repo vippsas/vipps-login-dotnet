@@ -61,7 +61,7 @@ And for the Episerver extensions
 
 ### Get API keys for Vipps Log In API
 
-Activate and set up [Vipps Login](https://developer.vippsmobilepay.com/docs/APIs/login-api/vipps-login-api-faq/#how-can-i-activate-and-set-up-vipps-login).
+Activate and set up [Vipps Login](https://developer.vippsmobilepay.com/docs/APIs/login-api/login-api-faq/#how-can-i-activate-and-set-up-vipps-login).
 
 Configure a redirect URI to your site(s): `https://{your-site}/vipps-login`. Replace `{your-site}` with your own host name. It can be `localhost`, as well.
 
