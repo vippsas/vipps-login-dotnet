@@ -16,11 +16,11 @@ namespace Vipps.Login
         {
             if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
                 throw new ArgumentException(
-                    $"Vipps Login: API keys (clientId, clientSecret) are required. See https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api-faq.md#how-can-i-activate-and-set-up-vipps-login",
+                    $"Vipps Login: API keys (clientId, clientSecret) are required. See https://developer.vippsmobilepay.com/docs/APIs/login-api/login-api-faq/#how-can-i-activate-and-set-up-vipps-login",
                     nameof(clientId));
             if (string.IsNullOrWhiteSpace(authority))
                 throw new ArgumentException(
-                    $"Vipps Login: Authority (base url) is required. See https://github.com/vippsas/vipps-login-api/blob/master/vipps-login-api.md#base-urls",
+                    $"Vipps Login: Authority (base url) is required. See https://developer.vippsmobilepay.com/docs/APIs/login-api/api-guide/browser-flow-integration/",
                     nameof(authority));
 
             ClientId = clientId;
