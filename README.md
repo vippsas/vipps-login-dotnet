@@ -122,7 +122,7 @@ public class AccountController : Controller
 
 ## Package maintainer
 
-<https://github.com/brianweet>
+[Brian Weeteling](https://github.com/brianweet)
 
 ## Changelog
 
