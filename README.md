@@ -67,7 +67,7 @@ Configure a redirect URI to your site(s): `https://{your-site}/vipps-login`. Rep
 
 To use the `VippsLoginConfig` helper class, add the `ClientId` and the `ClientSecret` to the `Web.Config AppSettings`, as such:
 
-```config
+```xml
 <add key="VippsLogin:ClientId" value="..." />
 <add key="VippsLogin:ClientSecret" value="..." />
 <add key="VippsLogin:Authority" value="https://apitest.vipps.no/access-management-1.0/access" />
@@ -75,7 +75,7 @@ To use the `VippsLoginConfig` helper class, add the `ClientId` and the `ClientSe
 
 For production, use:
 
-```config
+```xml
 <add key="VippsLogin:Authority" value="https://api.vipps.no/access-management-1.0/access" />
 ```
 
