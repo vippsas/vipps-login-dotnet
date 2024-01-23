@@ -34,12 +34,9 @@ This repository consists of three NuGet packages:
 - `Vipps.Login.Episerver` - Episerver code for Vipps Login.
 - `Vipps.Login.Episerver.Commerce` - Episerver Commerce code for Vipps Login.
 
+For more information, about login, see the [Login API guide](https://developer.vippsmobilepay.com/docs/APIs/login-api/).
+
 Note that Optimizely was previously called *Episerver*.
-
-For more information, see:
-
-* [Vipps Optimizely plugin page](https://vipps.no/produkter-og-tjenester/bedrift/ta-betalt-paa-nett/ta-betalt-paa-nett/episerver/)
-* [Vipps Login API guide](https://developer.vippsmobilepay.com/docs/APIs/login-api/)
 
 ## Features
 
