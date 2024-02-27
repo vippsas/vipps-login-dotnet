@@ -2,6 +2,7 @@
 ---
 title: Vipps Login for ASP.NET and Optimizely plugin
 sidebar_position: 1
+description: Allow customers to log in to Optimizely using the Vipps app.
 pagination_next: null
 pagination_prev: null
 ---
