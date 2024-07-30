@@ -165,7 +165,7 @@ public class Startup
 }
 ```
 
-When the user goes to `https://{your-site}/vipps-login`, the Vipps middleware will be triggered, and it will redirect the user to the Vipps log in environment. You'll have to configure this redirect URL in Vipps, as described in [Vipps MobilePay: How to set up Login for your sales unit](https://developer.vippsmobilepay.com/docs/developer-resources/portal/#how-to-set-up-login-for-your-sales-unit).
+When the user goes to `https://{your-site}/vipps-login`, the Vipps middleware will be triggered, and it will redirect the user to the Vipps log in environment. You'll have to configure this redirect URL in Vipps, as described in [Vipps MobilePay: How to set up Login for your sales unit](https://developer.vippsmobilepay.com/docs/knowledge-base/portal/#how-to-set-up-login-for-your-sales-unit).
 
 You can add a `ReturnUrl` to redirect the user once they are logged in. For example `https://{your-site}/vipps-login?ReturnUrl=/vipps-landing`.
 

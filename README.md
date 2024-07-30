@@ -59,7 +59,7 @@ And for the Episerver extensions
 
 ### Get API keys for Vipps Log In API
 
-Activate and set up [Vipps Login](https://developer.vippsmobilepay.com/docs/developer-resources/portal/#how-to-set-up-login-for-your-sales-unit).
+Activate and set up [Vipps Login](https://developer.vippsmobilepay.com/docs/knowledge-base/portal/#how-to-set-up-login-for-your-sales-unit).
 
 Configure a redirect URI to your site(s): `https://{your-site}/vipps-login`. Replace `{your-site}` with your own host name. It can be `localhost`, as well.
 
@@ -77,7 +77,7 @@ For production, use:
 <add key="VippsLogin:Authority" value="https://api.vipps.no/access-management-1.0/access" />
 ```
 
-See [Vipps test server](https://developer.vippsmobilepay.com/docs/test-environment/#test-server)
+See [Vipps test server](https://developer.vippsmobilepay.com/docs/knowledge-base/test-environment/#test-server)
 to find the default configuration for the Vipps OIDC middleware.
 
 ### Configuration
