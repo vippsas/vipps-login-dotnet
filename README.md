@@ -17,7 +17,7 @@ END_METADATA -->
 ![MobilePay](./docs/images/mp.png) *Not available for MobilePay.*
 
 
-*This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet).*
+*This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet). For support, [submit an issue](https://github.com/vippsas/vipps-login-dotnet) on GitHub.*
 
 <!-- START_COMMENT -->
 💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/plugins-ext/login-dotnet/). 💥
@@ -124,4 +124,9 @@ public class AccountController : Controller
 
 ## Changelog
 
-[Changelog](CHANGELOG.md)
+See [Changelog](CHANGELOG.md).
+
+## Support
+
+For problems with the plugin,
+[submit an issue](https://github.com/vippsas/vipps-login-dotnet) on GitHub.
