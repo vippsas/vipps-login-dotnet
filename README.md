@@ -12,7 +12,7 @@ END_METADATA -->
 
 ![Support and development by Geta ](./docs/images/geta.svg#gh-light-mode-only)![Support and development by Geta](./docs/images/geta_dark.svg#gh-dark-mode-only)
 
-![null](./docs/images/vipps.png) *Only available for Vipps.*
+![Vipps icon](./docs/images/vipps.png) *Only available for Vipps.*
 
 
 *This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet). For support, [submit an issue](https://github.com/vippsas/vipps-login-dotnet) on GitHub.*
