@@ -173,7 +173,7 @@ Vipps is using the OpenIdConnect Authorization Code Grant flow. This means the u
 
 ### The login and registration flow
 
-The library implements the [recommendations described by Vipps MobilePay](https://developer.vippsmobilepay.com/docs/APIs/login-api/api-guide/important-information/#recommendations-on-linking-to-user-account).
+The library implements the [recommendations described by Vipps MobilePay](https://developer.vippsmobilepay.com/docs/APIs/login-api/api-guide/important-information/).
 
 ### Link Vipps to an existing account
 
