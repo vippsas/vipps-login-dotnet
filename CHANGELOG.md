@@ -15,7 +15,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.3.0]
 
-Remove `VippsScopes.ApiV2` (it's default now, removed from Vipps Login documentation as well https://github.com/vippsas/vipps-login-api/pull/114)
+Remove `VippsScopes.ApiV2` (it's the default now, removed from Vipps Login documentation as well [PR #114](https://github.com/vippsas/vipps-login-api/pull/114))
 
 ## [0.2.2]
 
@@ -31,4 +31,4 @@ Add support for Vipps Login V2. Add the scope `VippsScopes.ApiV2` to your Vipps 
 
 ## [0.1.0-alpha]
 
-First release. This version passed security pentests.
+First release. This version passed security penetration tests.
