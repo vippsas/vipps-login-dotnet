@@ -15,7 +15,7 @@ Described in detail on the [Optimizely](https://docs.developers.optimizely.com/c
 
 ## Call by call
 
-### 1. Disable Role and Membership Providers
+### 1. Disable role and membership providers
 
 ```xml
 <authentication mode="None" />
@@ -46,7 +46,7 @@ Described in detail on the [Optimizely](https://docs.developers.optimizely.com/c
   </virtualRoles>
 ```
 
-### 3. Configure Vipps OIDC during app Startup
+### 3. Configure Vipps OIDC during app startup
 
 Here, you can find the default configuration for the Vipps OIDC middleware. Some tips:
 
@@ -179,7 +179,7 @@ The library implements the [recommendations described by Vipps MobilePay](https:
 
 ## Link Vipps to an existing account
 
-If you want to allow *logged in users* to link to Vipps to their existing non Vipps account, you can add a link the redirect them to `https://{your-site}/vipps-login?LinkAccount=true`. When they visit that link, they will be redirected to Vipps and can go through the log in process. Once they're redirected back to your site, their Vipps account will be linked to their existing account. This means that they will now be able to use Vipps to access their existing account, and they can sync their data from Vipps to Episerver.
+If you want to allow *logged-in users* to link to Vipps to their existing non Vipps account, you can add a link the redirect them to `https://{your-site}/vipps-login?LinkAccount=true`. When they visit that link, they will be redirected to Vipps and can go through the log in process. Once they're redirected back to your site, their Vipps account will be linked to their existing account. This means that they will now be able to use Vipps to access their existing account, and they can sync their data from Vipps to Episerver.
 
 ## Customized 'sanity check' during login
 
@@ -196,9 +196,9 @@ public class VippsLoginSanityCheck : IVippsLoginSanityCheck
 }
 ```
 
-## Linking a Vipps account to multiple webshop accounts
+## Linking a Vipps account to multiple web shop accounts
 
-It is not possible to link a Vipps account to multiple accounts on the webshop. The library will throw a `VippsLoginLinkAccountException` with the `UserError` property set to true. To recover from this, you can give the user the option to remove the link between the webshop account and the Vipps account. You can use the `IVippsLoginCommerceService.RemoveLinkToVippsAccount(CustomerContact contact)` method to remove the link to the existing account.
+It is not possible to link a Vipps account to multiple accounts on the web shop. The library will throw a `VippsLoginLinkAccountException` with the `UserError` property set to true. To recover from this, you can give the user the option to remove the link between the web shop account and the Vipps account. You can use the `IVippsLoginCommerceService.RemoveLinkToVippsAccount(CustomerContact contact)` method to remove the link to the existing account.
 
 ## Syncing Vipps user data
 
