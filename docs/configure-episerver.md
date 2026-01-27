@@ -2,8 +2,8 @@
 ---
 sidebar_label: Configure for Optimizely
 hide_table_of_contents: true
-pagination_next: null
-pagination_prev: null
+pagination_next: plugins-ext/login-dotnet/CHANGELOG
+pagination_prev: plugins-ext/login-dotnet/docs/configure-asp-net
 section: Plugins
 ---
 END_METADATA -->

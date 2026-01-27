@@ -5,7 +5,7 @@ sidebar_label: Changelog
 sidebar_position: 100
 description: All notable changes to the Login for ASP.NET and Episerver plugin will be documented in this file.
 pagination_next: null
-pagination_prev: null
+pagination_prev: plugins-ext/login-dotnet/docs/configure-episerver
 section: Plugins
 ---
 END_METADATA -->
