@@ -1,12 +1,7 @@
-<!-- START_METADATA
----
-sidebar_label: Configure for Optimizely
-hide_table_of_contents: true
-pagination_next: plugins-ext/login-dotnet/CHANGELOG
-pagination_prev: plugins-ext/login-dotnet/docs/configure-asp-net
-section: Plugins
----
-END_METADATA -->
+> [!WARNING]
+> **This plugin is deprecated.**
+> It is no longer actively maintained or supported. No further updates will be released.
+
 
 # Configure Login for Optimizely
 

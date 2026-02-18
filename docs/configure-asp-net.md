@@ -1,12 +1,6 @@
-<!-- START_METADATA
----
-sidebar_label: Configure for ASP.NET
-hide_table_of_contents: true
-pagination_next: plugins-ext/login-dotnet/docs/configure-episerver
-pagination_prev: plugins-ext/login-dotnet/README
-section: Plugins
----
-END_METADATA -->
+> [!WARNING]
+> **This plugin is deprecated.**
+> It is no longer actively maintained or supported. No further updates will be released.
 
 # Configure Login for ASP.NET
 

@@ -1,25 +1,9 @@
-<!-- START_METADATA
----
-title: Vipps Login for ASP.NET and Optimizely plugin
-sidebar_position: 1
-description: Allow customers to log in to Optimizely using the Vipps app.
-pagination_next: plugins-ext/login-dotnet/docs/configure-asp-net
-pagination_prev: null
-section: Plugins
----
-END_METADATA -->
+> [!WARNING]
+> **This plugin is deprecated.**
+> It is no longer actively maintained or supported. No further updates will be released.
+
 
 # Vipps Login for ASP.NET and Optimizely
-
-![Support and development by Geta ](./docs/images/geta.svg#gh-light-mode-only)![Support and development by Geta](./docs/images/geta_dark.svg#gh-dark-mode-only)
-
-*This plugin is built and maintained by [Geta](https://getadigital.com/?epslanguage=en) and is hosted on [GitHub](https://github.com/vippsas/vipps-login-dotnet). For support, [submit an issue](https://github.com/vippsas/vipps-login-dotnet) on GitHub.*
-
-<!-- START_COMMENT -->
-💥 Please use the plugin pages on [https://developer.vippsmobilepay.com](https://developer.vippsmobilepay.com/docs/plugins-ext/login-dotnet/). 💥
-<!-- END_COMMENT -->
-
-Please keep up-to-date with updates as soon as they happen.
 
 ## Description
 
